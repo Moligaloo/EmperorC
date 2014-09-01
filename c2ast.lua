@@ -76,10 +76,13 @@ local grammar = lpeg.P {
 		* lpeg.Cg(lpeg.Cp(), 'end_offset') 
 	),
 
+	variable = lpeg.V 'identifier' / function(s) return {type="variable", name = s} end,
+
 	expression = 
 		lpeg.V 'literal'
 		+ lpeg.V 'func_call'
-		+ ('(' * lpeg.V 'space0' * lpeg.V 'expression' * lpeg.V 'space0' * ')'), 
+		+ ('(' * lpeg.V 'space0' * lpeg.V 'expression' * lpeg.V 'space0' * ')')
+		+ lpeg.V 'variable',
 
 	space = lpeg.S ' \t\n' ^1,
 	space0 = lpeg.S ' \t\n' ^0,
