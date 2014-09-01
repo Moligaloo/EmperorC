@@ -83,7 +83,7 @@ local grammar = lpeg.P {
 	decimal = 
 		('0' * #(1-lpeg.V 'digit'- 'x'))
 		+ (lpeg.V "nonzerodigit" * lpeg.V "digit" ^0) * #(1-lpeg.V 'digit'),
-	hexadecimal = lpeg.P "0x" * lpeg.V'hexdigit' ^ 1,
+	hexadecimal = ('0' * lpeg.S 'xX') * lpeg.V'hexdigit' ^ 1,
 	integer = lpeg.V 'hexadecimal' + lpeg.V 'decimal',
 	float = lpeg.V 'decimal' * '.' * lpeg.V 'digit' ^1,
 
