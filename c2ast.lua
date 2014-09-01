@@ -98,7 +98,8 @@ local grammar = lpeg.P {
 	argument_list = lpeg.Ct(
 		lpeg.V 'expression'
 		* (lpeg.V 'spacecomma' * lpeg.V 'expression')^0
-	), 
+	)
+		+ (lpeg.Cc {}), 
 	spacecomma = lpeg.V 'space0' * ',' * lpeg.V 'space0',
 
 	digit = lpeg.R '09',
