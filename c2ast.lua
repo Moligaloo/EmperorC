@@ -80,12 +80,20 @@ local grammar = lpeg.P {
 	letter_ = lpeg.V 'letter' + '_',
 	digitletter_ = lpeg.V 'digit' + lpeg.V 'letter_',
 
-	decimal = '0' + lpeg.V "nonzerodigit" * lpeg.V "digit" ^0,
+	decimal = 
+		('0' * #(1-lpeg.V 'digit'- 'x'))
+		+ (lpeg.V "nonzerodigit" * lpeg.V "digit" ^0) * #(1-lpeg.V 'digit'),
 	hexadecimal = lpeg.P "0x" * lpeg.V'hexdigit' ^ 1,
 	integer = lpeg.V 'hexadecimal' + lpeg.V 'decimal',
+	float = lpeg.V 'decimal' * '.' * lpeg.V 'digit' ^1,
 
 	literal = 
-		lpeg.V 'integer' / function(s) return {type = "integer", value = tonumber(s)} end,
+		lpeg.V 'float' / function(s)
+			return {type = 'float', value = tonumber(s)}
+		end
+		+lpeg.V 'integer' / function(s) 
+			return {type = "integer", value = tonumber(s)}
+		 end,
 }
 
 function c2ast(source)
