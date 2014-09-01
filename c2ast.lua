@@ -105,6 +105,7 @@ local grammar = lpeg.P {
 	digit = lpeg.R '09',
 	nonzerodigit = lpeg.R '19',
 	hexdigit = lpeg.R('09','af', 'AF'),
+	octaldigit = lpeg.R('07'),
 	letter = lpeg.R('az', 'AZ'),
 	letter_ = lpeg.V 'letter' + '_',
 	digitletter_ = lpeg.V 'digit' + lpeg.V 'letter_',
@@ -113,7 +114,11 @@ local grammar = lpeg.P {
 		('0' * #(1-lpeg.V 'digit'- 'x'))
 		+ (lpeg.V "nonzerodigit" * lpeg.V "digit" ^0) * #(1-lpeg.V 'digit'),
 	hexadecimal = ('0' * lpeg.S 'xX') * lpeg.V'hexdigit' ^ 1,
-	integer = lpeg.V 'hexadecimal' + lpeg.V 'decimal',
+	octal = '0' * (lpeg.V 'octaldigit')^1,
+	integer = 
+		lpeg.V 'hexadecimal' / tonumber
+		+ lpeg.V 'octal' / function(s) return tonumber(s, 8) end
+		+ lpeg.V 'decimal' / tonumber,
 	float = lpeg.V 'decimal' * '.' * lpeg.V 'digit' ^1,
 
 	char_in_string = 1 - lpeg.P '"',
@@ -123,9 +128,9 @@ local grammar = lpeg.P {
 		lpeg.V 'float' / function(s)
 			return {type = 'float', value = tonumber(s)}
 		end
-		+ lpeg.V 'integer' / function(s) 
-			return {type = "integer", value = tonumber(s)}
-		 end
+		+ lpeg.V 'integer' / function(v) 
+			return { type = "integer", value = v} 
+		end
 		+ lpeg.V 'string' / function(s)
 			s = s:gsub('"(.+)"', "%1") 
 			
