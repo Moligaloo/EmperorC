@@ -80,9 +80,9 @@ local grammar = lpeg.P {
 	letter_ = lpeg.V 'letter' + '_',
 	digitletter_ = lpeg.V 'digit' + lpeg.V 'letter_',
 
-	decimal = '0' + lpeg.V "nonzerodigit" * lpeg.V "digit" ^1,
-	hexadecimal = lpeg.S "0x" * lpeg.V'hexdigit' ^ 1,
-	integer = lpeg.V 'decimal' + lpeg.V 'hexadecimal',
+	decimal = '0' + lpeg.V "nonzerodigit" * lpeg.V "digit" ^0,
+	hexadecimal = lpeg.P "0x" * lpeg.V'hexdigit' ^ 1,
+	integer = lpeg.V 'hexadecimal' + lpeg.V 'decimal',
 
 	literal = 
 		lpeg.V 'integer' / function(s) return {type = "integer", value = tonumber(s)} end,
