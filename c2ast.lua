@@ -87,13 +87,19 @@ local grammar = lpeg.P {
 	integer = lpeg.V 'hexadecimal' + lpeg.V 'decimal',
 	float = lpeg.V 'decimal' * '.' * lpeg.V 'digit' ^1,
 
+	char_in_string = 1 - lpeg.P '"',
+	string = '"' * lpeg.V 'char_in_string' ^0 * '"',
+
 	literal = 
 		lpeg.V 'float' / function(s)
 			return {type = 'float', value = tonumber(s)}
 		end
-		+lpeg.V 'integer' / function(s) 
+		+ lpeg.V 'integer' / function(s) 
 			return {type = "integer", value = tonumber(s)}
-		 end,
+		 end
+		+ lpeg.V 'string' / function(s)
+			return {type = "string", value = s}
+		end,
 }
 
 function c2ast(source)
