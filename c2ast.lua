@@ -78,7 +78,8 @@ local grammar = lpeg.P {
 
 	expression = 
 		lpeg.V 'literal'
-		+ lpeg.V 'func_call',
+		+ lpeg.V 'func_call'
+		+ ('(' * lpeg.V 'space0' * lpeg.V 'expression' * lpeg.V 'space0' * ')'), 
 
 	space = lpeg.S ' \t\n' ^1,
 	space0 = lpeg.S ' \t\n' ^0,
