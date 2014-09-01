@@ -9,7 +9,9 @@ local grammar = lpeg.P {
 	'units';
 	units = lpeg.Ct(lpeg.Cg(lpeg.V 'unit' * lpeg.V 'unit_sep')^1),
 	unit_sep = lpeg.S '\n\t ' ^0,
-	unit = lpeg.V 'include_directive' + lpeg.V 'func_def',
+	unit = 
+		lpeg.V 'include_directive' 
+		+ lpeg.V 'func_def',
 
 	include_directive = lpeg.Ct(
 		lpeg.Cg(lpeg.Cc 'include', 'type')
@@ -56,7 +58,8 @@ local grammar = lpeg.P {
 	statement = lpeg.V 'statement_body' * lpeg.V 'statement_tail',
 	statement_tail = lpeg.V 'space0' * ';' * lpeg.V 'space0',
 	statement_body = 
-		lpeg.V 'return_stmt',
+		lpeg.V 'return_stmt'
+		+ lpeg.V 'expression_stmt',
 
 	return_stmt = lpeg.Ct(
 		lpeg.Cg(lpeg.Cc 'return_stmt', 'type')
@@ -66,17 +69,42 @@ local grammar = lpeg.P {
 		* lpeg.Cg(lpeg.V 'expression', 'expression')
 		* lpeg.Cg(lpeg.Cp(), 'end_offset') 
 	),
-	expression = lpeg.V 'literal',
+	expression_stmt = lpeg.Ct(
+		lpeg.Cg(lpeg.Cc 'expression_stmt', 'type')
+		* lpeg.Cg(lpeg.Cp(), 'begin_offset') 
+		* lpeg.Cg(lpeg.V 'expression', 'expression')
+		* lpeg.Cg(lpeg.Cp(), 'end_offset') 
+	),
+
+	expression = 
+		lpeg.V 'literal'
+		+ lpeg.V 'func_call',
 
 	space = lpeg.S ' \t\n' ^1,
 	space0 = lpeg.S ' \t\n' ^0,
 	builtin_types = lpeg.P 'int' + lpeg.P 'char',
 	control_flow = lpeg.P 'if' + lpeg.P 'while' + lpeg.P 'for' + lpeg.P 'do',
 
+	func_call = lpeg.Ct(
+		lpeg.Cg(lpeg.Cc 'func_call', 'type')
+		* lpeg.Cg(lpeg.V 'identifier', 'func_name')
+		* lpeg.V 'space0'
+		* '('
+		* lpeg.V 'space0'
+		* lpeg.Cg(lpeg.V 'argument_list', 'argument_list')
+		* lpeg.V 'space0'
+		* ')'
+	),
+	argument_list = lpeg.Ct(
+		lpeg.V 'expression'
+		* (lpeg.V 'spacecomma' * lpeg.V 'expression')^0
+	), 
+	spacecomma = lpeg.V 'space0' * ',' * lpeg.V 'space0',
+
 	digit = lpeg.R '09',
 	nonzerodigit = lpeg.R '19',
-	hexdigit = lpeg.V 'digit' + lpeg.R 'af' + lpeg.R 'AF',
-	letter = lpeg.R 'az' + lpeg.R 'AZ',
+	hexdigit = lpeg.R('09','af', 'AF'),
+	letter = lpeg.R('az', 'AZ'),
 	letter_ = lpeg.V 'letter' + '_',
 	digitletter_ = lpeg.V 'digit' + lpeg.V 'letter_',
 
