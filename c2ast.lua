@@ -54,7 +54,7 @@ local grammar = lpeg.P {
 	param_list = 
 		lpeg.Ct(lpeg.V 'param_def' * (lpeg.P ',' * lpeg.V 'param_def') ^0),
 
-	code = lpeg.Ct(lpeg.V 'statement'),
+	code = lpeg.Ct(lpeg.V 'statement' ^0),
 	statement = lpeg.V 'statement_body' * lpeg.V 'statement_tail',
 	statement_tail = lpeg.V 'space0' * ';' * lpeg.V 'space0',
 	statement_body = 
