@@ -127,6 +127,19 @@ local grammar = lpeg.P {
 			return {type = "integer", value = tonumber(s)}
 		 end
 		+ lpeg.V 'string' / function(s)
+			s = s:gsub('"(.+)"', "%1") 
+			
+			s = s:gsub('\\"', '"')
+			s = s:gsub("\\'", "'")
+			s = s:gsub('\\\\', '\\')
+			s = s:gsub('\\a', '\a')
+			s = s:gsub('\\b', '\b')
+			s = s:gsub('\\f', '\f')
+			s = s:gsub('\\n', "\n")
+			s = s:gsub('\\r', '\r')
+			s = s:gsub('\\t', '\t')
+			s = s:gsub('\\v', '\v')
+
 			return {type = "string", value = s}
 		end,
 }
