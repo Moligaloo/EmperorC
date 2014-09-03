@@ -39,7 +39,9 @@ local grammar_string = [[
 	statement <- expression_stmt 
 	expression_stmt <- 
 		{| {:expression:expression:} S0 ';' |}
-	expression <- {| @integer@ {:value:integer:} |}
+	expression <-
+		{| @float@ {:value:float:} |} 
+		/ {| @integer@ {:value:integer:} |}
 
 	S <- %s+
 	S0 <- %s*
@@ -52,6 +54,8 @@ local grammar_string = [[
 		{hexdigit} -> tonumber 
 		/ {octal} -> tonumber8 
 		/ {decimal} -> tonumber
+
+	float <- {decimal '.' %d+ } -> tonumber
 ]]
 
 grammar_string = grammar_string
