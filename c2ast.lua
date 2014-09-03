@@ -46,13 +46,15 @@ local grammar_string = [[
 	param_def <- {| {:type:param_type:} S0 {:name:identifier:} |} 
 	param_type <- {'const'? S0 type S0 ('*'+ 'const'?  / '') &[_a-zA-Z ] } -> simplify_type
 	code <- {| (S0 statement S0) + |}
-	statement <- expression_stmt 
+	statement <- expression_stmt / return_stmt
 	expression_stmt <- 
 		{| {:expression:expression:} S0 ';' |}
 	expression <-
 		{| @float@ {:value:float:} |} 
 		/ {| @integer@ {:value:integer:} |}
 		/ {| @string@ {:value:string:} |}
+	return_stmt <- 
+		{| @return@ <<< 'return' S0 {:expression:expression:} S0 ';' >>> |}
 
 	S <- %s+
 	S0 <- %s*
