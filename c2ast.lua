@@ -9,19 +9,29 @@ local defs = {
 	simplify_type = function(s)
 		return s:gsub("^%s*(.-)%s*$", "%1"):gsub("%s+", ' ')
 	end,
-
 	tonumber = tonumber,
-	
 	tonumber8 = function(s) 
 		return tonumber(s, 8)
-	end
+	end,
+	unquote = function(s)
+		return s:gsub('\\"', '"')
+				:gsub("\\'", "'")
+				:gsub('\\\\', '\\')
+				:gsub('\\a', '\a')
+				:gsub('\\b', '\b')
+				:gsub('\\f', '\f')
+				:gsub('\\n', "\n")
+				:gsub('\\r', '\r')
+				:gsub('\\t', '\t')
+				:gsub('\\v', '\v')
+	end,
 }
 
 local grammar_string = [[
 	units <- {| (S0 unit S0)+ |}
  	unit <- include_directive / func_def
 	include_directive <- {| @include@ <<< '#include' S0 '<' {:filename: filename :} '>' >>> |} 
-	filename <- {[^"'<>]+}
+	filename <- {[^"<>]+}
 	type <- identifier
 	func_def <- {|
 		@func_def@
@@ -42,6 +52,7 @@ local grammar_string = [[
 	expression <-
 		{| @float@ {:value:float:} |} 
 		/ {| @integer@ {:value:integer:} |}
+		/ {| @string@ {:value:string:} |}
 
 	S <- %s+
 	S0 <- %s*
@@ -56,6 +67,9 @@ local grammar_string = [[
 		/ {decimal} -> tonumber
 
 	float <- {decimal '.' %d+ } -> tonumber
+
+	char_in_string <- ( '\' [abfntf"] ) / [^"]
+	string <- ('"' {char_in_string+} '"' ) -> unquote
 ]]
 
 grammar_string = grammar_string
