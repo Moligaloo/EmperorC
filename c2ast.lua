@@ -53,11 +53,17 @@ local grammar_string = [[
 		{| @float@ {:value:float:} |} 
 		/ {| @integer@ {:value:integer:} |}
 		/ {| @string@ {:value:string:} |}
+		/ {| @func_call@ {:value:func_call:} |}
 	return_stmt <- 
 		{| @return@ <<< 'return' S0 {:expression:expression:} S0 ';' >>> |}
 
 	S <- %s+
 	S0 <- %s*
+
+	func_call <- 
+		{| {:name:identifier:} S0 '(' S0 {:arguments:arguments:} S0 ')' |}
+
+	arguments <- {| (expression (S0 ',' S0 expression)*)? |}
 
 	nzdigit <- [1-9]
 	decimal <- ('0' / nzdigit %d*) !%d
