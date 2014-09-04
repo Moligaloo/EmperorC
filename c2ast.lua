@@ -25,6 +25,10 @@ local defs = {
 				:gsub('\\t', '\t')
 				:gsub('\\v', '\v')
 	end,
+
+	debug = function(s)
+		print(("debug: [%s]"):format(json.encode(s)))
+	end,
 }
 
 local grammar_string = [[
@@ -43,11 +47,11 @@ local grammar_string = [[
 	identifier <- [a-zA-Z_][a-zA-Z0-9_]*
 	params <- (param_def (S0 ',' S0 param_def)* )?
 	param_def <- {| {:type:type:}{:name:identifier:} |} 
-	type_head <- 'const'? S0 identifier
-	type_tail <- ('*'+ 'const'?)?
-	type <- {type_head S0 type_tail &[_a-zA-Z ] } -> simplify_type
+	type_prefix <- 'const'? S0 identifier
+	type_suffix <- ('*'+ 'const'?)? &[_a-zA-Z ]
+	type <- {type_prefix S0 type_suffix} -> simplify_type
 	code <- {| (S0 statement S0) + |}
-	statement <- expression_stmt / return_stmt
+	statement <- return_stmt / expression_stmt / var_decl_stmt
 	expression_stmt <- 
 		{| {:expression:expression:} S0 ';' |}
 	expression <-
@@ -57,6 +61,16 @@ local grammar_string = [[
 		/ {| @func_call@ {:value:func_call:} |}
 	return_stmt <- 
 		{| @return@ <<< 'return' S0 {:expression:expression:} S0 ';' >>> |}
+
+	var_decl_stmt <- 
+		{| @var_decl@ <<< var_decl S0 ';' >>> |}
+	var_decl <- 
+		{:type_prefix:type_prefix:}
+		S0 
+		{:names:
+		{|type_suffix_identifer (S0 ',' S0 type_suffix_identifer)* |}
+		:} 
+	type_suffix_identifer <- {| {:type_suffix:type_suffix:} S0 {:name:identifier:} |}
 
 	S <- %s+
 	S0 <- %s*
@@ -87,6 +101,8 @@ grammar_string = grammar_string
 	:gsub("@([%w_]+)@", "{:type: '' -> '%1' :}")
 
 local grammar = re.compile(grammar_string, defs)
+
+-- print(json.encode(grammar:match("int a,b,c;")))
 
 function c2ast(source)
 	local fp = io.open(source, "r")
