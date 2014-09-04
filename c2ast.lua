@@ -59,6 +59,7 @@ local grammar_string = [[
 		/ {| @integer@ {:value:integer:} |}
 		/ {| @string@ {:value:string:} |}
 		/ {| @func_call@ {:value:func_call:} |}
+		/ {| @var_ref@ {:value:identifier:} |}
 	return_stmt <- 
 		{| @return@ <<< 'return' S0 #expression# S0 ';' >>> |}
 
