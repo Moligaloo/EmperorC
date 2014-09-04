@@ -68,9 +68,9 @@ local grammar_string = [[
 		{:type_prefix:type_prefix:}
 		S0 
 		{:names:
-		{|type_suffix_identifer (S0 ',' S0 type_suffix_identifer)* |}
+		{|sii (S0 ',' S0 sii)* |}
 		:} 
-	type_suffix_identifer <- {| {:type_suffix:type_suffix:} S0 {:name:identifier:} |}
+	sii <- {| #type_suffix# S0 {:name:identifier:} (S0 '=' S0 {:init:expression:} )? |}
 
 	S <- %s+
 	S0 <- %s*
@@ -112,5 +112,5 @@ function c2ast(source)
 	print(json.encode(ast, {indent = true}))
 end
 
-c2ast(arg[1] or "./example/hello.c")
+c2ast(arg[1] or "./example/add.c")
 
