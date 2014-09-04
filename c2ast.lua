@@ -32,19 +32,20 @@ local grammar_string = [[
  	unit <- include_directive / func_def
 	include_directive <- {| @include@ <<< '#include' S0 '<' {:filename: filename :} '>' >>> |} 
 	filename <- {[^"<>]+}
-	type <- identifier
 	func_def <- {|
 		@func_def@
 		<<<
-		{:return_type:type:} S {:name:identifier:} S0 
+		{:return_type:type:} {:name:identifier:} S0 
 		'(' {:params: {| params |} :} ')' S0
 		'{' S0 {:code:code:} S0 '}'
 		>>>
 	|}
 	identifier <- [a-zA-Z_][a-zA-Z0-9_]*
 	params <- (param_def (S0 ',' S0 param_def)* )?
-	param_def <- {| {:type:param_type:} S0 {:name:identifier:} |} 
-	param_type <- {'const'? S0 type S0 ('*'+ 'const'?  / '') &[_a-zA-Z ] } -> simplify_type
+	param_def <- {| {:type:type:}{:name:identifier:} |} 
+	type_head <- 'const'? S0 identifier
+	type_tail <- ('*'+ 'const'?)?
+	type <- {type_head S0 type_tail &[_a-zA-Z ] } -> simplify_type
 	code <- {| (S0 statement S0) + |}
 	statement <- expression_stmt / return_stmt
 	expression_stmt <- 
