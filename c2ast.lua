@@ -54,13 +54,16 @@ local grammar_string = [[
 	statement <- return_stmt / expression_stmt / var_decl_stmt
 	expression_stmt <- 
 		{| #expression# S0 ';' |}
-	expression <-
-		{| @float@ {:value:float:} |} 
-		/ {| @integer@ {:value:integer:} |}
-		/ {| @string@ {:value:string:} |}
-		/ {| @func_call@ {:value:func_call:} |}
-		/ {| @var_ref@ {:value:identifier:} |}
+	expression <- 
+		term
 		/ '(' S0 expression S0 ')' 
+	term <-
+		@float@ {:value:float:} 
+		/ @integer@ {:value:integer:} 
+		/ @string@ {:value:string:} 
+		/ @func_call@ {:value:func_call:} 
+		/ @var@ {:value:identifier:} 
+
 	return_stmt <- 
 		{| @return@ <<< 'return' S0 #expression# S0 ';' >>> |}
 
