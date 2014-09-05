@@ -55,7 +55,7 @@ local grammar_string = [[
 	expression_stmt <- 
 		{| #expression# S0 ';' |}
 	expression <- 
-		term
+		{| term |}
 		/ '(' S0 expression S0 ')' 
 	term <-
 		@float@ {:value:float:} 
