@@ -29,9 +29,13 @@ local defs = {
 	debug = function(s)
 		print(("debug: [%s]"):format(json.encode(s)))
 	end,
+
+	simplify_sii = function ( ... )
+		return 
+	end
 }
 
-local grammar_string = [[
+local grammar = [[
 	units <- {| (S0 unit S0)+ |}
  	unit <- include_directive / func_def
 	include_directive <- {| @include@ <<< '#include' S0 '<' #filename# '>' >>> |} 
@@ -75,7 +79,7 @@ local grammar_string = [[
 		{:names:
 		{|sii (S0 ',' S0 sii)* |}
 		:} 
-	sii <- {| #type_suffix# S0 {:name:identifier:} (S0 '=' S0 {:init:expression:} )? |}
+	sii <- ({| #type_suffix# S0 {:name:identifier:} (S0 '=' S0 {:init:expression:} )? |}) -> simplify_sii
 
 	S <- %s+
 	S0 <- %s*
@@ -100,22 +104,21 @@ local grammar_string = [[
 	string <- ('"' {char_in_string+} '"' ) -> unquote
 ]]
 
-grammar_string = grammar_string
+grammar = grammar
 	:gsub("<<<", "{:start_offset: {} :}" )
 	:gsub(">>>", "{:end_offset: {} :}")
 	:gsub("@([%w_]+)@", "{:type: '' -> '%1' :}")
 	:gsub('#([%w_]+)#', '{:%1:%1:}')
 
-local grammar = re.compile(grammar_string, defs)
-
-function c2ast(source)
+local function c2ast(source)
 	local fp = io.open(source, "r")
 	local content = fp:read '*a'
 	fp:close()
 
-	local ast = grammar:match(content)
-	print(json.encode(ast, {indent = true}))
+	return re.compile(grammar, defs):match(content)
 end
 
-c2ast(arg[1] or "./example/add.c")
+local source = arg[1] or "./example/add.c"
+local ast = c2ast(source)
+print(json.encode(ast, {indent = true}))
 
