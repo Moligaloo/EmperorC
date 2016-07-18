@@ -11,6 +11,24 @@ local escaped_char_map = {
 	v = 0x0B
 }
 
+local reverse_escaped_char_map = {}
+for key, value in pairs(escaped_char_map) do
+	reverse_escaped_char_map[value] = key
+end
+
+local function readable_char(char)
+	if reverse_escaped_char_map[char] then
+		return ("\\%s"):format(reverse_escaped_char_map[char])
+	end
+
+	local str = string.char(char)
+	if str:find("%g") then
+		return ("%s"):format(str)
+	else
+		return ("\\x%02X"):format(char)
+	end
+end
+
 local literal_integer_mt = {
 	__index = {
 		tostring = function(self)
@@ -30,12 +48,7 @@ local literal_float_mt = {
 local literal_character_mt = {
 	__index = {
 		tostring = function(self)
-			local str = string.char(self.value)
-			if str:find("%g") then
-				return ("'%s'"):format(str)
-			else
-				return ("'\\x%02X'"):format(self.value)
-			end
+			return ("'%s'"):format(readable_char(self.value))
 		end
 	}
 }
@@ -118,16 +131,7 @@ function debug_session:load(filename)
 	file:close()
 
 	self.definitions = grammar:match(content)
-
-	if self.definitions then
-		table.sort(
-			self.definitions,
-			function(a, b)
-				return a.definition < b.definition
-			end
-		)
-	end
-
+	
 	return self.definitions
 end
 
