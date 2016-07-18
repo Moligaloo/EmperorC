@@ -8,7 +8,9 @@ local escaped_char_map = {
 	n = 0x0A,
 	r = 0x0D,
 	t = 0x09,
-	v = 0x0B
+	v = 0x0B,
+	["'"] = 0x27,
+	['"'] = 0x22
 }
 
 local reverse_escaped_char_map = {}
@@ -57,23 +59,20 @@ local grammar = re.compile([[
 	definitions <- {| definition+ |}
 	definition <- global_variable_definition
 	global_variable_definition <- {|
-		{type_specifier} SPACE* {identifier} SPACE* {: static_initializer :}? SPACE* SEMICOLON SPACE*
+		{type_specifier} %s* {IDENTIFIER} %s* {: static_initializer :}? %s* ';' %s*
 	|} -> global_variable_definition
-	type_specifier <- primitive_type (SPACE+ '*'+)?
-	identifier <- [_%w][_%w%d]*
+	type_specifier <- primitive_type (%s+ '*'+)?
 	primitive_type <- 'int' / 'float' / 'char'
-	static_initializer <- '=' SPACE* {: literal_value :}
+	static_initializer <- '=' %s* {: literal_value :}
 	literal_value <- float / integer / character
 	integer <- hexadecimal_integer / decimal_integer
 	hexadecimal_integer <- ('0x' HEXCHAR+) -> literal_hexadecimal_integer
 	decimal_integer <- (%d+) -> literal_decimal_integer
 	float <- (%d+ '.' %d+) -> literal_float
 	character <- "'" single_character "'"
-	single_character <- escaped_char / ascii_char
-	ascii_char <- . -> ascii_char
-	escaped_char <- ('\' { [abfnrtv] } ) -> escaped_char
- 	SPACE <- %s
-	SEMICOLON <- ';'
+	single_character <- ('\' { [abfnrtv'] } ) -> escaped_char / [^'] -> ascii_char 
+
+	IDENTIFIER <- [_%w][_%w%d]*
 	HEXCHAR <- [0-9a-fA-F]
 ]], {
 	global_variable_definition = function(captures)
