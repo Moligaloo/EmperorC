@@ -1,7 +1,7 @@
 require 're'
 
 -- copied from https://en.wikipedia.org/wiki/Escape_sequences_in_C
-escaped_char_map = {
+local escaped_char_map = {
 	a = 0x07,
 	b = 0x08,
 	f = 0x0C,
@@ -51,7 +51,9 @@ local grammar = re.compile([[
 	primitive_type <- 'int' / 'float' / 'char'
 	static_initializer <- '=' SPACE* {: literal_value :}
 	literal_value <- float / integer / character
-	integer <- (%d+) -> literal_integer
+	integer <- hexadecimal_integer / decimal_integer
+	hexadecimal_integer <- ('0x' HEXCHAR+) -> literal_hexadecimal_integer
+	decimal_integer <- (%d+) -> literal_decimal_integer
 	float <- (%d+ '.' %d+) -> literal_float
 	character <- "'" single_character "'"
 	single_character <- escaped_char / ascii_char
@@ -59,6 +61,7 @@ local grammar = re.compile([[
 	escaped_char <- ('\' { [abfnrtv] } ) -> escaped_char
  	SPACE <- %s
 	SEMICOLON <- ';'
+	HEXCHAR <- [0-9a-fA-F]
 ]], {
 	global_variable_definition = function(captures)
 		return {
@@ -68,7 +71,13 @@ local grammar = re.compile([[
 			initializer = captures[3]
 		}
 	end,
-	literal_integer = function(str)
+	literal_hexadecimal_integer = function(str)
+		return setmetatable(
+			{type = 'literal_integer', value = tonumber(str, 16)},
+			literal_integer_mt
+		)
+	end,
+	literal_decimal_integer = function(str)
 		return setmetatable(
 			{type = 'literal_integer', value = tonumber(str)}, 
 			literal_integer_mt
