@@ -18,15 +18,22 @@ for key, value in pairs(escaped_char_map) do
 	reverse_escaped_char_map[value] = key
 end
 
-local function readable_char(char)
-	if reverse_escaped_char_map[char] then
-		return ("\\%s"):format(reverse_escaped_char_map[char])
+local function readable_char(char, type)
+	local str = string.char(char)
+
+	if str == "'" and type == 'char' then
+		return [[\']]
+	elseif str == '"' and type == 'string' then
+		return [[\"]]
 	end
 
-	local str = string.char(char)
 	if str:find("%g") then
 		return ("%s"):format(str)
 	else
+		if reverse_escaped_char_map[char] then
+			return ("\\%s"):format(reverse_escaped_char_map[char])
+		end
+
 		return ("\\x%02X"):format(char)
 	end
 end
@@ -50,7 +57,7 @@ local literal_float_mt = {
 local literal_character_mt = {
 	__index = {
 		tostring = function(self)
-			return ("'%s'"):format(readable_char(self.value))
+			return ("'%s'"):format(readable_char(self.value, 'char'))
 		end
 	}
 }
