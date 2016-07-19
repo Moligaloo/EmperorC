@@ -42,7 +42,8 @@ local literal_integer_mt = {
 	__index = {
 		tostring = function(self)
 			return ("%d"):format(self.value)
-		end
+		end,
+		size = function() return 4 end
 	}
 }
 
@@ -50,7 +51,8 @@ local literal_float_mt = {
 	__index = {
 		tostring = function(self)
 			return ("%g"):format(self.value)
-		end
+		end,
+		size = function() return 4 end
 	}
 }
 
@@ -58,15 +60,32 @@ local literal_character_mt = {
 	__index = {
 		tostring = function(self)
 			return ("'%s'"):format(readable_char(self.value, 'char'))
-		end
+		end,
+		size = function() return 1 end
 	}
 }
 
 local string_mt = {
 	__index = {
 		tostring = function(self)
-			return self.value
-		end
+			return ('"%s"'):format(self.value:gsub(".", function(char)
+				if char == '"' then
+					return '\\"'
+				end
+
+				if char:find "%g" then
+					return char
+				else
+					local byte = string.byte(char)
+					if reverse_escaped_char_map[byte] then
+						return "\\" .. reverse_escaped_char_map[byte]
+					else
+						return ("\\x%02X"):format(byte)
+					end
+				end
+			end))
+		end,
+		size = function() return #self.value + 1 end
 	}
 }
 
@@ -85,9 +104,9 @@ local grammar = re.compile([[
 	decimal_integer <- (%d+) -> literal_decimal_integer
 	float <- (%d+ '.' %d+) -> literal_float
 	character <- "'" single_character "'"
-	single_character <- ('\' { [abfnrtv'] } ) -> escaped_char / [^'] -> ascii_char 
-	string <- '"' { char_in_string* } -> string '"'
-	char_in_string <- ('\' [abfnrtv"] ) / [^"]
+	single_character <- ('\' { [abfnrtv'] } ) -> escaped_char / [^'] -> normal_char 
+	string <- '"' {| char_in_string* |} -> string '"'
+	char_in_string <- ('\' {[abfnrtv"]} ) -> escaped_char_map / [^"] -> string_byte
 
 	IDENTIFIER <- [_%w][_%w%d]*
 	HEXCHAR <- [0-9a-fA-F]
@@ -118,24 +137,26 @@ local grammar = re.compile([[
 			literal_float_mt
 		)
 	end,
-	ascii_char = function(char)
+	normal_char = function(char)
 		return setmetatable(
-			{type = 'literal_character', value = string.byte(char) },
+			{type = 'character', value = string.byte(char) },
 			literal_character_mt
 		)
 	end,
 	escaped_char = function(char)
 		return setmetatable(
-			{type = 'literal_character', value = escaped_char_map[char] },
+			{type = 'character', value = escaped_char_map[char] },
 			literal_character_mt
 		)
 	end,
-	string = function(str)
+	string = function(chars)
 		return setmetatable(
-			{type = 'string', value = str},
+			{type = 'string', value = string.char(unpack(chars))},
 			string_mt
 		)
 	end,
+	escaped_char_map = escaped_char_map,
+	string_byte = string.byte
 })
 
 local debug_session = {}
