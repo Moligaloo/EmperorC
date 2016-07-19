@@ -62,6 +62,14 @@ local literal_character_mt = {
 	}
 }
 
+local string_mt = {
+	__index = {
+		tostring = function(self)
+			return self.value
+		end
+	}
+}
+
 local grammar = re.compile([[
 	definitions <- {| definition+ |}
 	definition <- global_variable_definition
@@ -71,13 +79,15 @@ local grammar = re.compile([[
 	type_specifier <- primitive_type (%s+ '*'+)?
 	primitive_type <- 'int' / 'float' / 'char'
 	static_initializer <- '=' %s* {: literal_value :}
-	literal_value <- float / integer / character
+	literal_value <- float / integer / character / string
 	integer <- hexadecimal_integer / decimal_integer
 	hexadecimal_integer <- ('0x' HEXCHAR+) -> literal_hexadecimal_integer
 	decimal_integer <- (%d+) -> literal_decimal_integer
 	float <- (%d+ '.' %d+) -> literal_float
 	character <- "'" single_character "'"
 	single_character <- ('\' { [abfnrtv'] } ) -> escaped_char / [^'] -> ascii_char 
+	string <- '"' { char_in_string* } -> string '"'
+	char_in_string <- ('\' [abfnrtv"] ) / [^"]
 
 	IDENTIFIER <- [_%w][_%w%d]*
 	HEXCHAR <- [0-9a-fA-F]
@@ -118,6 +128,12 @@ local grammar = re.compile([[
 		return setmetatable(
 			{type = 'literal_character', value = escaped_char_map[char] },
 			literal_character_mt
+		)
+	end,
+	string = function(str)
+		return setmetatable(
+			{type = 'string', value = str},
+			string_mt
 		)
 	end,
 })
