@@ -38,7 +38,7 @@ local function readable_char(char, type)
 	end
 end
 
-local literal_integer_mt = {
+local integer_mt = {
 	__index = {
 		tostring = function(self)
 			return ("%d"):format(self.value)
@@ -47,7 +47,7 @@ local literal_integer_mt = {
 	}
 }
 
-local literal_float_mt = {
+local float_mt = {
 	__index = {
 		tostring = function(self)
 			return ("%g"):format(self.value)
@@ -56,7 +56,7 @@ local literal_float_mt = {
 	}
 }
 
-local literal_character_mt = {
+local character_mt = {
 	__index = {
 		tostring = function(self)
 			return ("'%s'"):format(readable_char(self.value, 'char'))
@@ -100,9 +100,9 @@ local grammar = re.compile([[
 	static_initializer <- '=' %s* {: literal_value :}
 	literal_value <- float / integer / character / string
 	integer <- hexadecimal_integer / decimal_integer
-	hexadecimal_integer <- ('0x' HEXCHAR+) -> literal_hexadecimal_integer
-	decimal_integer <- (%d+) -> literal_decimal_integer
-	float <- (%d+ '.' %d+) -> literal_float
+	hexadecimal_integer <- ('0x' HEXCHAR+) -> hexadecimal_integer
+	decimal_integer <- (%d+) -> decimal_integer
+	float <- (%d+ '.' %d+) -> float
 	character <- "'" single_character "'"
 	single_character <- ('\' { [abfnrtv'] } ) -> escaped_char / [^'] -> normal_char 
 	string <- '"' {| char_in_string* |} -> string '"'
@@ -119,34 +119,34 @@ local grammar = re.compile([[
 			initializer = captures[3]
 		}
 	end,
-	literal_hexadecimal_integer = function(str)
+	hexadecimal_integer = function(str)
 		return setmetatable(
-			{type = 'literal_integer', value = tonumber(str, 16)},
-			literal_integer_mt
+			{type = 'integer', value = tonumber(str, 16)},
+			integer_mt
 		)
 	end,
-	literal_decimal_integer = function(str)
+	decimal_integer = function(str)
 		return setmetatable(
-			{type = 'literal_integer', value = tonumber(str)}, 
-			literal_integer_mt
+			{type = 'integer', value = tonumber(str)}, 
+			integer_mt
 		)
 	end,
-	literal_float = function(str)
+	float = function(str)
 		return setmetatable(
-			{type = 'literal_float', value = tonumber(str)},
-			literal_float_mt
+			{type = 'float', value = tonumber(str)},
+			float_mt
 		)
 	end,
 	normal_char = function(char)
 		return setmetatable(
 			{type = 'character', value = string.byte(char) },
-			literal_character_mt
+			character_mt
 		)
 	end,
 	escaped_char = function(char)
 		return setmetatable(
 			{type = 'character', value = escaped_char_map[char] },
-			literal_character_mt
+			character_mt
 		)
 	end,
 	string = function(chars)
