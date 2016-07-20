@@ -38,54 +38,53 @@ local function readable_char(char, type)
 	end
 end
 
-local integer_mt = {
-	__index = {
-		tostring = function(self)
-			return ("%d"):format(self.value)
-		end,
-		size = function() return 4 end
-	}
-}
-
-local float_mt = {
-	__index = {
-		tostring = function(self)
-			return ("%g"):format(self.value)
-		end,
-		size = function() return 4 end
-	}
-}
-
-local character_mt = {
-	__index = {
-		tostring = function(self)
-			return ("'%s'"):format(readable_char(self.value, 'char'))
-		end,
-		size = function() return 1 end
-	}
-}
-
-local string_mt = {
-	__index = {
-		tostring = function(self)
-			return ('"%s"'):format(self.value:gsub(".", function(char)
-				if char == '"' then
-					return '\\"'
-				end
-
-				if char:find "%g" then
-					return char
-				else
-					local byte = string.byte(char)
-					if reverse_escaped_char_map[byte] then
-						return "\\" .. reverse_escaped_char_map[byte]
-					else
-						return ("\\x%02X"):format(byte)
+local metatables = {
+	integer = {
+		__index = {
+			tostring = function(self)
+				return ("%d"):format(self.value)
+			end,
+			size = function() return 4 end
+		}
+	},
+	float = {
+		__index = {
+			tostring = function(self)
+				return ("%g"):format(self.value)
+			end,
+			size = function() return 4 end
+		}
+	},
+	character = {
+		__index = {
+			tostring = function(self)
+				return ("'%s'"):format(readable_char(self.value, 'char'))
+			end,
+			size = function() return 1 end
+		}
+	},
+	string = {
+		__index = {
+			tostring = function(self)
+				return ('"%s"'):format(self.value:gsub(".", function(char)
+					if char == '"' then
+						return '\\"'
 					end
-				end
-			end))
-		end,
-		size = function() return #self.value + 1 end
+
+					if char:find "%g" then
+						return char
+					else
+						local byte = string.byte(char)
+						if reverse_escaped_char_map[byte] then
+							return "\\" .. reverse_escaped_char_map[byte]
+						else
+							return ("\\x%02X"):format(byte)
+						end
+					end
+				end))
+			end,
+			size = function() return #self.value + 1 end
+		}
 	}
 }
 
@@ -107,8 +106,8 @@ local grammar = re.compile([[
 	string <- '"' {| char_in_string* |} -> string '"'
 	char_in_string <- ('\' {[abfnrtv"]} ) -> escaped_char_map / [^"] -> string_byte
 
-	function_definition <- {| function_header function_body |} -> function_definition
-	function_header <- {| {return_type} %s+ {IDENTIFIER} '()' |} -> function_header
+	function_definition <- {| {:header:function_header:} {:body:function_body:} |}
+	function_header <- {| {:return_type:return_type:} %s+ {:name:IDENTIFIER:} '()' |} 
 	return_type <- PRIMITIVE / 'void'
 	function_body <- {| %s* '{' %s* statement+ %s* '}' %s* |}
 	statement <- return_statement / assignment_statement / expression_statement
@@ -118,7 +117,7 @@ local grammar = re.compile([[
 	call_expression <- IDENTIFIER %s '(' argument_list ')' 
 	expression_statement <- {| {: expression :} ENDING_SEMICOLON |} -> expression_statement
 	assignment_statement <- IDENTIFIER %s* '=' %s* expression ENDING_SEMICOLON
-	return_statement <- {| ('return' %s+ {: expression :} ENDING_SEMICOLON) |} -> return_statement
+	return_statement <- {| {:statement: 'return' :} %s+ {:value: expression :} ENDING_SEMICOLON |} 
 	term <- literal_value
 	argument_list <- expression
 	
@@ -140,55 +139,41 @@ local grammar = re.compile([[
 	hexadecimal_integer = function(str)
 		return setmetatable(
 			{type = 'integer', value = tonumber(str, 16)},
-			integer_mt
+			metatables.integer
 		)
 	end,
 	decimal_integer = function(str)
 		return setmetatable(
 			{type = 'integer', value = tonumber(str)}, 
-			integer_mt
+			metatables.integer
 		)
 	end,
 	float = function(str)
 		return setmetatable(
 			{type = 'float', value = tonumber(str)},
-			float_mt
+			metatables.float
 		)
 	end,
 	normal_char = function(char)
 		return setmetatable(
 			{type = 'character', value = string.byte(char) },
-			character_mt
+			metatables.float
 		)
 	end,
 	escaped_char = function(char)
 		return setmetatable(
 			{type = 'character', value = escaped_char_map[char] },
-			character_mt
+			metatables.character
 		)
 	end,
 	string = function(chars)
 		return setmetatable(
 			{type = 'string', value = string.char(unpack(chars))},
-			string_mt
+			metatables.string
 		)
 	end,
 	escaped_char_map = escaped_char_map,
 	string_byte = string.byte,
-
-	function_header = function(captures)
-		return {
-			return_type = captures[1],
-			name = captures[2]
-		}
-	end,
-
-	function_definition = function(captures)
-		return {
-			header = captures[1],
-			body = captures[2]
-		}
-	end,
 	return_statement = function(captures)
 		return {
 			statement = 'return',
