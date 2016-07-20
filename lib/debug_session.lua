@@ -116,13 +116,14 @@ local grammar = re.compile([[
 	function_body <- {| %s* '{' %s* statement+ %s* '}' %s* |}
 	statement <- return_statement / assignment_statement / expression_statement
 	expression <- unary_expression / binary_expression / call_expression / term
-	unary_expression <- UNUARY_OP term
+	unary_expression <- {| {:op: UNUARY_OP :} %s* {:A: term :} |}
 	binary_expression <- {| {:A: term :} %s* {:op: BINARY_OP :} %s* {:B: term :} |}
 	call_expression <- IDENTIFIER %s '(' argument_list ')' 
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON  |}
 	assignment_statement <- IDENTIFIER %s* '=' %s* expression ENDING_SEMICOLON
 	return_statement <- {| {:statement: 'return' :} %s+ {:value: expression :} ENDING_SEMICOLON |} 
-	term <- literal_value
+	term <- literal_value / variable
+	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	argument_list <- expression
 	
 	ENDING_SEMICOLON <- %s* ';' %s*
@@ -157,6 +158,9 @@ local grammar = re.compile([[
 	end,
 	string = function(chars)
 		return create_value('string', string.char(unpack(chars)))
+	end,
+	variable = function(t)
+		return create_value('variable', t.name)
 	end,
 	escaped_char_map = escaped_char_map,
 	string_byte = string.byte
