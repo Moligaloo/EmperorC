@@ -88,6 +88,10 @@ local metatables = {
 	}
 }
 
+local function create_value(type, value)
+	return setmetatable({type = type, value = value}, metatables[type])
+end
+
 local grammar = re.compile([[
 	definitions <- {| definition+ |}
 	definition <- function_definition / global_variable_definition
@@ -115,7 +119,7 @@ local grammar = re.compile([[
 	unary_expression <- UNUARY_OP term
 	binary_expression <- {| {:A: term :} %s* {:op: BINARY_OP :} %s* {:B: term :} |}
 	call_expression <- IDENTIFIER %s '(' argument_list ')' 
-	expression_statement <- {| {: expression :} ENDING_SEMICOLON |} -> expression_statement
+	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON  |}
 	assignment_statement <- IDENTIFIER %s* '=' %s* expression ENDING_SEMICOLON
 	return_statement <- {| {:statement: 'return' :} %s+ {:value: expression :} ENDING_SEMICOLON |} 
 	term <- literal_value
@@ -137,55 +141,25 @@ local grammar = re.compile([[
 		}
 	end,
 	hexadecimal_integer = function(str)
-		return setmetatable(
-			{type = 'integer', value = tonumber(str, 16)},
-			metatables.integer
-		)
+		return create_value('integer', tonumber(str, 16))
 	end,
 	decimal_integer = function(str)
-		return setmetatable(
-			{type = 'integer', value = tonumber(str)}, 
-			metatables.integer
-		)
+		return create_value('integer', tonumber(str))
 	end,
 	float = function(str)
-		return setmetatable(
-			{type = 'float', value = tonumber(str)},
-			metatables.float
-		)
+		return create_value('float', tonumber(str))
 	end,
 	normal_char = function(char)
-		return setmetatable(
-			{type = 'character', value = string.byte(char) },
-			metatables.float
-		)
+		return create_value('character', string.byte(char))
 	end,
 	escaped_char = function(char)
-		return setmetatable(
-			{type = 'character', value = escaped_char_map[char] },
-			metatables.character
-		)
+		return create_value('character', escaped_char_map[char])
 	end,
 	string = function(chars)
-		return setmetatable(
-			{type = 'string', value = string.char(unpack(chars))},
-			metatables.string
-		)
+		return create_value('string', string.char(unpack(chars)))
 	end,
 	escaped_char_map = escaped_char_map,
-	string_byte = string.byte,
-	return_statement = function(captures)
-		return {
-			statement = 'return',
-			value = captures[1]
-		}
-	end,
-	expression_statement = function(captures)
-		return {
-			statement = 'expression',
-			value = captures[1]
-		}
-	end,
+	string_byte = string.byte
 })
 
 local debug_session = {}
