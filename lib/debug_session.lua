@@ -91,12 +91,11 @@ local string_mt = {
 
 local grammar = re.compile([[
 	definitions <- {| definition+ |}
-	definition <- global_variable_definition
+	definition <- function_definition / global_variable_definition
 	global_variable_definition <- {|
-		{type_specifier} %s* {IDENTIFIER} %s* {: static_initializer :}? %s* ';' %s*
+		{type_specifier} %s* {IDENTIFIER} %s* {: static_initializer :}? ENDING_SEMICOLON
 	|} -> global_variable_definition
-	type_specifier <- primitive_type (%s+ '*'+)?
-	primitive_type <- 'int' / 'float' / 'char'
+	type_specifier <- PRIMITIVE (%s+ '*'+)?
 	static_initializer <- '=' %s* {: literal_value :}
 	literal_value <- float / integer / character / string
 	integer <- hexadecimal_integer / decimal_integer
@@ -108,6 +107,25 @@ local grammar = re.compile([[
 	string <- '"' {| char_in_string* |} -> string '"'
 	char_in_string <- ('\' {[abfnrtv"]} ) -> escaped_char_map / [^"] -> string_byte
 
+	function_definition <- {| function_header function_body |} -> function_definition
+	function_header <- {| {return_type} %s+ {IDENTIFIER} '()' |} -> function_header
+	return_type <- PRIMITIVE / 'void'
+	function_body <- {| %s* '{' %s* statement+ %s* '}' %s* |}
+	statement <- return_statement / assignment_statement / expression_statement
+	expression <- unary_expression / binary_expression / call_expression / term
+	unary_expression <- UNUARY_OP term
+	binary_expression <- {| {:A: term :} %s* {:op: BINARY_OP :} %s* {:B: term :} |}
+	call_expression <- IDENTIFIER %s '(' argument_list ')' 
+	expression_statement <- {| {: expression :} ENDING_SEMICOLON |} -> expression_statement
+	assignment_statement <- IDENTIFIER %s* '=' %s* expression ENDING_SEMICOLON
+	return_statement <- {| ('return' %s+ {: expression :} ENDING_SEMICOLON) |} -> return_statement
+	term <- literal_value
+	argument_list <- expression
+	
+	ENDING_SEMICOLON <- %s* ';' %s*
+	UNUARY_OP <- '-'
+	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
+	PRIMITIVE <- 'int' / 'float' / 'char'
 	IDENTIFIER <- [_%w][_%w%d]*
 	HEXCHAR <- [0-9a-fA-F]
 ]], {
@@ -156,7 +174,33 @@ local grammar = re.compile([[
 		)
 	end,
 	escaped_char_map = escaped_char_map,
-	string_byte = string.byte
+	string_byte = string.byte,
+
+	function_header = function(captures)
+		return {
+			return_type = captures[1],
+			name = captures[2]
+		}
+	end,
+
+	function_definition = function(captures)
+		return {
+			header = captures[1],
+			body = captures[2]
+		}
+	end,
+	return_statement = function(captures)
+		return {
+			statement = 'return',
+			value = captures[1]
+		}
+	end,
+	expression_statement = function(captures)
+		return {
+			statement = 'expression',
+			value = captures[1]
+		}
+	end,
 })
 
 local debug_session = {}
