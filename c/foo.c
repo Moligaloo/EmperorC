@@ -6,4 +6,5 @@ int hex = 0x12;
 char c='a';
 char single_quote = '\'';
 char double_quote = '"';
-char **str = "hello,world\n";
+char *str = "hello,world\n";
+
