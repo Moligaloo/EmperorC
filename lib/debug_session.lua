@@ -93,7 +93,7 @@ local function create_value(type, value)
 end
 
 local grammar = re.compile([[
-	definitions <- {| definition+ |}
+	definitions <- {| (definition %s*)+ |}
 	definition <- function_definition / global_variable_definition
 	global_variable_definition <- {|
 		{type_specifier} %s* {IDENTIFIER} %s* {: static_initializer :}? ENDING_SEMICOLON
@@ -113,7 +113,7 @@ local grammar = re.compile([[
 	function_definition <- {| {:definition:'' -> 'function' :} {:header:function_header:} {:body:function_body:} |}
 	function_header <- {| {:return_type:return_type:} %s+ {:name:IDENTIFIER:} '(' %s* {:parameters:parameters:} %s* ')' |} 
 	return_type <- PRIMITIVE / 'void'
-	function_body <- {| %s* '{' %s* statement+ %s* '}' %s* |}
+	function_body <- {| %s* '{' %s* statement* %s* '}' %s* |}
 	statement <- return_statement / assignment_statement / expression_statement
 	expression <- unary_expression / binary_expression / call_expression / term
 	unary_expression <- {| {:op: UNUARY_OP :} %s* {:A: term :} |}
