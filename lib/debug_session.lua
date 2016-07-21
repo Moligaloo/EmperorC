@@ -110,8 +110,8 @@ local grammar = re.compile([[
 	string <- '"' {| char_in_string* |} -> string '"'
 	char_in_string <- ('\' {[abfnrtv"]} ) -> escaped_char_map / [^"] -> string_byte
 
-	function_definition <- {| {:header:function_header:} {:body:function_body:} |}
-	function_header <- {| {:return_type:return_type:} %s+ {:name:IDENTIFIER:} '()' |} 
+	function_definition <- {| {:definition:'' -> 'function' :} {:header:function_header:} {:body:function_body:} |}
+	function_header <- {| {:return_type:return_type:} %s+ {:name:IDENTIFIER:} '(' %s* {:parameters:parameters:} %s* ')' |} 
 	return_type <- PRIMITIVE / 'void'
 	function_body <- {| %s* '{' %s* statement+ %s* '}' %s* |}
 	statement <- return_statement / assignment_statement / expression_statement
@@ -125,6 +125,8 @@ local grammar = re.compile([[
 	term <- literal_value / variable
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	argument_list <- expression
+	parameter <- {| {:type: type_specifier :} %s* {:name: IDENTIFIER :} |}
+	parameters <- {| parameter (%s* ',' %s* parameter)* |} / '' 
 	
 	ENDING_SEMICOLON <- %s* ';' %s*
 	UNUARY_OP <- '-'
