@@ -95,9 +95,7 @@ end
 local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
 	definition <- function_definition / global_variable_definition
-	global_variable_definition <- {|
-		{type_specifier} S {IDENTIFIER} S {: static_initializer :}? ENDING_SEMICOLON
-	|} -> global_variable_definition
+	global_variable_definition <- {| <variable_defintion> |} -> global_variable_definition
 	type_specifier <- PRIMITIVE (S '*'+)?
 	static_initializer <- '=' S {: literal_value :}
 	literal_value <- float / integer / character / string
@@ -122,6 +120,8 @@ local grammar = re.compile([[
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
 	assignment_statement <- IDENTIFIER S '=' S expression ENDING_SEMICOLON
 	return_statement <- {| {:statement: 'return' :} S {:value: expression :} ENDING_SEMICOLON |} 
+	vardef_statement <- {| {:statement: '' -> 'vardef' :} <variable_defintion> |} 
+	variable_defintion <- {type_specifier} S {IDENTIFIER} S {: static_initializer :}? ENDING_SEMICOLON 
 	term <- literal_value / variable
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	arguments <- {| argument (S ',' S argument)* |} / ''
