@@ -135,7 +135,9 @@ local grammar = re.compile([[
 	PRIMITIVE <- 'int' / 'float' / 'char'
 	IDENTIFIER <- [_%w][_%w%d]*
 	HEXCHAR <- [0-9a-fA-F]
-	COMMENT <- '//' [^%nl]* %nl
+	SINGLE_LINE_COMMENT <- '//' [^%nl]* %nl
+	MULTILINE_COMMENT <- '/*' ([^*] / ('*' !'/' ))* '*/'
+	COMMENT <- SINGLE_LINE_COMMENT / MULTILINE_COMMENT
 	S <- (%s / COMMENT)*
 ]], {
 	global_variable_definition = function(captures)
