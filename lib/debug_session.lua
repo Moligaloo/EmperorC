@@ -95,7 +95,7 @@ end
 local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
 	definition <- function_definition / global_variable_definition
-	global_variable_definition <- {| <variable_defintion> |} -> global_variable_definition
+	global_variable_definition <- {| {:definition: '' -> 'global' :} <variable_defintion> |} 
 	type_specifier <- PRIMITIVE (S '*'+)?
 	static_initializer <- '=' S {: literal_value :}
 	literal_value <- float / integer / character / string
@@ -112,7 +112,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:return_type:} S {:name:IDENTIFIER:} '(' S {:parameters:parameters:} S ')'
 	return_type <- PRIMITIVE / 'void'
 	function_body <- {| S '{' S statement* S '}' S |}
-	statement <- return_statement / assignment_statement / expression_statement
+	statement <- return_statement / assignment_statement / expression_statement / vardef_statement
 	expression <- call_expression / unary_expression / binary_expression / term
 	unary_expression <- {| {:op: UNUARY_OP :} S {:A: term :} |}
 	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: term :} |}
@@ -121,7 +121,7 @@ local grammar = re.compile([[
 	assignment_statement <- IDENTIFIER S '=' S expression ENDING_SEMICOLON
 	return_statement <- {| {:statement: 'return' :} S {:value: expression :} ENDING_SEMICOLON |} 
 	vardef_statement <- {| {:statement: '' -> 'vardef' :} <variable_defintion> |} 
-	variable_defintion <- {type_specifier} S {IDENTIFIER} S {: static_initializer :}? ENDING_SEMICOLON 
+	variable_defintion <- {:type:type_specifier:} S {:name:IDENTIFIER:} S {:initializer: static_initializer :}? ENDING_SEMICOLON 
 	term <- literal_value / variable
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	arguments <- {| argument (S ',' S argument)* |} / ''
@@ -140,14 +140,6 @@ local grammar = re.compile([[
 	COMMENT <- SINGLE_LINE_COMMENT / MULTILINE_COMMENT
 	S <- (%s / COMMENT)*
 ]], {
-	global_variable_definition = function(captures)
-		return {
-			definition = 'global',
-			type = captures[1],
-			name = captures[2],
-			initializer = captures[3]
-		}
-	end,
 	hexadecimal_integer = function(str)
 		return create_value('integer', tonumber(str, 16))
 	end,
