@@ -130,7 +130,7 @@ local grammar = re.compile([[
 	parameters <- {| parameter (S ',' S parameter)* |} / '' 
 	
 	ENDING_SEMICOLON <- S ';' S
-	UNUARY_OP <- '-'
+	UNUARY_OP <- [&-]
 	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
 	PRIMITIVE <- 'int' / 'float' / 'char'
 	IDENTIFIER <- [_%w][_%w%d]*
