@@ -93,13 +93,13 @@ local function create_value(type, value)
 end
 
 local grammar = re.compile([[
-	definitions <- {| (definition %s*)+ |}
+	definitions <- {| (definition S)+ |}
 	definition <- function_definition / global_variable_definition
 	global_variable_definition <- {|
-		{type_specifier} %s* {IDENTIFIER} %s* {: static_initializer :}? ENDING_SEMICOLON
+		{type_specifier} S {IDENTIFIER} S {: static_initializer :}? ENDING_SEMICOLON
 	|} -> global_variable_definition
-	type_specifier <- PRIMITIVE (%s+ '*'+)?
-	static_initializer <- '=' %s* {: literal_value :}
+	type_specifier <- PRIMITIVE (S '*'+)?
+	static_initializer <- '=' S {: literal_value :}
 	literal_value <- float / integer / character / string
 	integer <- hexadecimal_integer / decimal_integer
 	hexadecimal_integer <- ('0x' HEXCHAR+) -> hexadecimal_integer
@@ -111,30 +111,31 @@ local grammar = re.compile([[
 	char_in_string <- ('\' {[abfnrtv"]} ) -> escaped_char_map / [^"] -> string_byte
 
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
-	function_head <- {:return_type:return_type:} %s+ {:name:IDENTIFIER:} '(' %s* {:parameters:parameters:} %s* ')'
+	function_head <- {:return_type:return_type:} S {:name:IDENTIFIER:} '(' S {:parameters:parameters:} S ')'
 	return_type <- PRIMITIVE / 'void'
-	function_body <- {| %s* '{' %s* statement* %s* '}' %s* |}
+	function_body <- {| S '{' S statement* S '}' S |}
 	statement <- return_statement / assignment_statement / expression_statement
 	expression <- call_expression / unary_expression / binary_expression / term
-	unary_expression <- {| {:op: UNUARY_OP :} %s* {:A: term :} |}
-	binary_expression <- {| {:A: term :} %s* {:op: BINARY_OP :} %s* {:B: term :} |}
-	call_expression <- {| {:function_name:IDENTIFIER:} %s* {:arguments: '(' %s* {: arguments :} %s* ')' :} |}
+	unary_expression <- {| {:op: UNUARY_OP :} S {:A: term :} |}
+	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: term :} |}
+	call_expression <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
-	assignment_statement <- IDENTIFIER %s* '=' %s* expression ENDING_SEMICOLON
-	return_statement <- {| {:statement: 'return' :} %s+ {:value: expression :} ENDING_SEMICOLON |} 
+	assignment_statement <- IDENTIFIER S '=' S expression ENDING_SEMICOLON
+	return_statement <- {| {:statement: 'return' :} S {:value: expression :} ENDING_SEMICOLON |} 
 	term <- literal_value / variable
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
-	arguments <- {| argument (%s* ',' %s* argument)* |} / ''
+	arguments <- {| argument (S ',' S argument)* |} / ''
 	argument <- expression
-	parameter <- {| {:type: type_specifier :} %s* {:name: IDENTIFIER :} |}
-	parameters <- {| parameter (%s* ',' %s* parameter)* |} / '' 
+	parameter <- {| {:type: type_specifier :} S {:name: IDENTIFIER :} |}
+	parameters <- {| parameter (S ',' S parameter)* |} / '' 
 	
-	ENDING_SEMICOLON <- %s* ';' %s*
+	ENDING_SEMICOLON <- S ';' S
 	UNUARY_OP <- '-'
 	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
 	PRIMITIVE <- 'int' / 'float' / 'char'
 	IDENTIFIER <- [_%w][_%w%d]*
 	HEXCHAR <- [0-9a-fA-F]
+	S <- (%s)*
 ]], {
 	global_variable_definition = function(captures)
 		return {
