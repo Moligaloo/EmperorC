@@ -93,7 +93,7 @@ local function create_value(type, value)
 end
 
 local grammar = re.compile([[
-	definitions <- {| (definition S)+ |}
+	definitions <- {| (S definition S)+ |}
 	definition <- function_definition / global_variable_definition
 	global_variable_definition <- {|
 		{type_specifier} S {IDENTIFIER} S {: static_initializer :}? ENDING_SEMICOLON
