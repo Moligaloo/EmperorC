@@ -1,0 +1,53 @@
+---
+- name: a
+  type: int
+  definition: global
+- name: b
+  initializer:
+    type: integer
+    value: 1
+  type: int
+  definition: global
+- name: f
+  initializer:
+    type: float
+    value: 1.2
+  type: float
+  definition: global
+- name: newline
+  initializer:
+    type: character
+    value: 10
+  type: char
+  definition: global
+- name: hex
+  initializer:
+    type: integer
+    value: 18
+  type: int
+  definition: global
+- name: c
+  initializer:
+    type: character
+    value: 97
+  type: char
+  definition: global
+- name: single_quote
+  initializer:
+    type: character
+    value: 39
+  type: char
+  definition: global
+- name: double_quote
+  initializer:
+    type: character
+    value: 34
+  type: char
+  definition: global
+- name: str
+  initializer:
+    type: string
+    value: "hello,world\n"
+  type: char *
+  definition: global
+  
