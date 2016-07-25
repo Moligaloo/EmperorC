@@ -1,6 +1,6 @@
-local debug_session = require 'lib.debug_session'
+local emperor = require 'lib.emperor_c'
 
-local session = debug_session.new()
+local session = emperor.session.new()
 local yaml = require 'yaml'
 
 print(yaml.dump(session:load 'c/hello.c'))

@@ -165,16 +165,14 @@ local grammar = re.compile([[
 	string_byte = string.byte
 })
 
-local debug_session = {}
-debug_session.__index = debug_session
+local session = {}
+session.__index = session
 
-function debug_session.new()
-	local session = {}
-	setmetatable(session, debug_session)
-	return session
+function session.new()
+	return setmetatable({}, session)
 end
 
-function debug_session:load(filename)
+function session:load(filename)
 	local file = io.open(filename)
 	local content = file:read '*a'
 	file:close()
@@ -192,7 +190,7 @@ local function map(list, func)
 	return mapped
 end
 
-function debug_session:dump()
+function session:dump()
 	if self.definitions then
 		local lines = map(self.definitions, function(definition) 
 			if definition.definition == 'global' then
@@ -213,4 +211,6 @@ function debug_session:dump()
  	end
 end
 
-return debug_session
+return {
+	session = session
+}
