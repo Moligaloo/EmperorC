@@ -1,4 +1,4 @@
-require 're'
+local re = require 're'
 
 -- copied from https://en.wikipedia.org/wiki/Escape_sequences_in_C
 local escaped_char_map = {
@@ -112,14 +112,21 @@ local grammar = re.compile([[
 	function_head <- {:return_type:return_type:} S {:name:IDENTIFIER:} '(' S {:parameters:parameters:} S ')'
 	return_type <- PRIMITIVE / 'void'
 	function_body <- {| S '{' S statement* S '}' S |}
-	statement <- return_statement / assignment_statement / expression_statement / vardef_statement
+	statement <- jump_statement / assignment_statement / expression_statement / vardef_statement
 	expression <- call_expression / unary_expression / binary_expression / term
 	unary_expression <- {| {:op: UNUARY_OP :} S {:A: term :} |}
 	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: term :} |}
 	call_expression <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
 	assignment_statement <- IDENTIFIER S '=' S expression ENDING_SEMICOLON
-	return_statement <- {| {:statement: 'return' :} S {:value: expression :} ENDING_SEMICOLON |} 
+	
+	jump_statement <- {| {:statement: '' -> 'jump' :} <jump_action> ENDING_SEMICOLON |}
+	jump_action <- jump_goto / jump_continue / jump_break / jump_return
+	jump_goto <- {:jump: 'goto' :} {:label: IDENTIFIER :}
+	jump_continue <- {:jump: 'continue' :}
+	jump_break <- {:jump: 'break' :}
+	jump_return <- {:jump: 'return' :} S {:value: expression :}?
+
 	vardef_statement <- {| {:statement: '' -> 'vardef' :} <vardef> |} 
 	term <- literal_value / variable
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
