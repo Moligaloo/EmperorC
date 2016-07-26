@@ -14,3 +14,4 @@ char double_quote = '"';
 char *str = "hello,world";
 int a[10];
 custom_type custom_variable;
+const static float pi = 3.1415926;

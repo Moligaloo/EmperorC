@@ -82,3 +82,13 @@
   - name: custom_variable
   type: custom_type
   definition: global
+- modifiers:
+  - const
+  - static
+  quads:
+  - name: pi
+    initializer:
+      type: float
+      value: 3.1415926
+  type: float
+  definition: global

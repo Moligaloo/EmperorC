@@ -134,8 +134,11 @@ local grammar = re.compile([[
 	vardef_initializer <- '=' S {:initializer: expression :}
 	vardef_quad <- {| <vardef_stars>? S <vardef_name> S <vardef_bracket>? S <vardef_initializer>? |}
 	vardef_quads <- {| vardef_quad (S ',' S vardef_quad)* |}
-	vardef <-  S {:type: IDENTIFIER :} S {:quads: vardef_quads :} ENDING_SEMICOLON 
+	vardef_modifier <- S {VARDEF_MODIFIER} S
+	vardef_modifiers <- {| vardef_modifier+ |}
+	vardef <-  S {:modifiers:vardef_modifiers:}? S {:type: IDENTIFIER :} S {:quads: vardef_quads :} ENDING_SEMICOLON 
 
+	VARDEF_MODIFIER <- 'static' / 'const' / 'auto' / 'register'
 	ENDING_SEMICOLON <- S ';' S
 	UNUARY_OP <- [&-]
 	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
