@@ -95,7 +95,7 @@ end
 local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
 	definition <- function_definition / global_variable_definition
-	global_variable_definition <- {| {:definition: '' -> 'global' :} <variable_defintion> |} 
+	global_variable_definition <- {| {:definition: '' -> 'global' :} <vardef> |} 
 	type_specifier <- PRIMITIVE (S '*'+)?
 	static_initializer <- '=' S {: literal_value :}
 	literal_value <- float / integer / character / string
@@ -120,15 +120,22 @@ local grammar = re.compile([[
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
 	assignment_statement <- IDENTIFIER S '=' S expression ENDING_SEMICOLON
 	return_statement <- {| {:statement: 'return' :} S {:value: expression :} ENDING_SEMICOLON |} 
-	vardef_statement <- {| {:statement: '' -> 'vardef' :} <variable_defintion> |} 
-	variable_defintion <- {:type:type_specifier:} S {:name:IDENTIFIER:} S {:initializer: static_initializer :}? ENDING_SEMICOLON 
+	vardef_statement <- {| {:statement: '' -> 'vardef' :} <vardef> |} 
 	term <- literal_value / variable
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	arguments <- {| argument (S ',' S argument)* |} / ''
 	argument <- expression
 	parameter <- {| {:type: type_specifier :} S {:name: IDENTIFIER :} |}
 	parameters <- {| parameter (S ',' S parameter)* |} / '' 
-	
+
+	vardef_stars <- {:stars: [*]+ :}
+	vardef_name <- {:name: IDENTIFIER :}
+	vardef_bracket <- {:array_count: '[' integer ']' :}
+	vardef_initializer <- '=' S {:initializer: expression :}
+	vardef_quad <- {| <vardef_stars>? S <vardef_name> S <vardef_bracket>? S <vardef_initializer>? |}
+	vardef_quads <- {| vardef_quad (S ',' S vardef_quad)* |}
+	vardef <-  S {:type: IDENTIFIER :} S {:quads: vardef_quads :} ENDING_SEMICOLON 
+
 	ENDING_SEMICOLON <- S ';' S
 	UNUARY_OP <- [&-]
 	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='

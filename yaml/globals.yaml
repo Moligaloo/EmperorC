@@ -1,53 +1,84 @@
 ---
-- name: a
+- quads:
+  - name: a
   type: int
   definition: global
-- name: b
-  initializer:
-    type: integer
-    value: 1
+- quads:
+  - name: b
+    initializer:
+      type: integer
+      value: 1
   type: int
   definition: global
-- name: f
-  initializer:
-    type: float
-    value: 1.2
+- quads:
+  - name: c
+    initializer:
+      type: integer
+      value: 1
+  - name: d
+    initializer:
+      type: integer
+      value: 2
+  type: int
+  definition: global
+- quads:
+  - name: f
+    initializer:
+      type: float
+      value: 1.2
   type: float
   definition: global
-- name: newline
-  initializer:
-    type: character
-    value: 10
+- quads:
+  - name: newline
+    initializer:
+      type: character
+      value: 10
   type: char
   definition: global
-- name: hex
-  initializer:
-    type: integer
-    value: 18
+- quads:
+  - name: hex
+    initializer:
+      type: integer
+      value: 18
   type: int
   definition: global
-- name: c
-  initializer:
-    type: character
-    value: 97
+- quads:
+  - name: c
+    initializer:
+      type: character
+      value: 97
   type: char
   definition: global
-- name: single_quote
-  initializer:
-    type: character
-    value: 39
+- quads:
+  - name: single_quote
+    initializer:
+      type: character
+      value: 39
   type: char
   definition: global
-- name: double_quote
-  initializer:
-    type: character
-    value: 34
+- quads:
+  - name: double_quote
+    initializer:
+      type: character
+      value: 34
   type: char
   definition: global
-- name: str
-  initializer:
-    type: string
-    value: "hello,world\n"
-  type: char *
+- quads:
+  - name: str
+    initializer:
+      type: string
+      value: hello,world
+    stars: '*'
+  type: char
   definition: global
-  
+- quads:
+  - name: a
+    array_count:
+      type: integer
+      value: 10
+  type: int
+  definition: global
+- quads:
+  - name: custom_variable
+  type: custom_type
+  definition: global
