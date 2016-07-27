@@ -122,7 +122,7 @@ local grammar = re.compile([[
 	
 	jump_statement <- {| {:statement: '' -> 'jump' :} <jump_action> ENDING_SEMICOLON |}
 	jump_action <- jump_goto / jump_continue / jump_break / jump_return
-	jump_goto <- {:jump: 'goto' :} {:label: IDENTIFIER :}
+	jump_goto <- {:jump: 'goto' :} S {:label: IDENTIFIER :}
 	jump_continue <- {:jump: 'continue' :}
 	jump_break <- {:jump: 'break' :}
 	jump_return <- {:jump: 'return' :} S {:value: expression :}?
@@ -149,12 +149,14 @@ local grammar = re.compile([[
 	ENDING_SEMICOLON <- S ';' S
 	UNUARY_OP <- [&-]
 	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
-	PRIMITIVE <- 'int' / 'float' / 'char'
-	IDENTIFIER <- [_%w][_%w%d]*
+	PRIMITIVE <- 'char' / 'short' / 'int' / 'long' / 'float' / 'double'
+	JUMP <- 'return' / 'goto' / 'break' / 'continue'
+	IDENTIFIER <- (! KEYWORD ) [_%w][_%w%d]*
 	HEXCHAR <- [0-9a-fA-F]
 	SINGLE_LINE_COMMENT <- ('//' / '#') [^%nl]* %nl
 	MULTILINE_COMMENT <- '/*' ([^*] / ('*' !'/' ))* '*/'
 	COMMENT <- SINGLE_LINE_COMMENT / MULTILINE_COMMENT
+	KEYWORD <- PRIMITIVE / JUMP
 	S <- (%s / COMMENT)*
 ]], {
 	hexadecimal_integer = function(str)
