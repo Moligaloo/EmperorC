@@ -110,13 +110,15 @@ local grammar = re.compile([[
 
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
 	function_head <- {:return_type:return_type:} S {:name:IDENTIFIER:} '(' S {:parameters:parameters:} S ')'
-	return_type <- PRIMITIVE / 'void'
+	return_type <- PRIMITIVE / 'void' / IDENTIFIER
 	function_body <- {| S '{' S statement* S '}' S |}
-	statement <- jump_statement / assignment_statement / expression_statement / vardef_statement
 	expression <- call_expression / unary_expression / binary_expression / term
 	unary_expression <- {| {:op: UNUARY_OP :} S {:A: term :} |}
 	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: term :} |}
 	call_expression <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
+
+	-- statements
+	statement <- jump_statement / assignment_statement / expression_statement / vardef_statement
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
 	assignment_statement <- IDENTIFIER S '=' S expression ENDING_SEMICOLON
 	
@@ -145,6 +147,7 @@ local grammar = re.compile([[
 	vardef_modifiers <- {| vardef_modifier+ |}
 	vardef <-  S {:modifiers:vardef_modifiers:}? S {:type: IDENTIFIER :} S {:quads: vardef_quads :} ENDING_SEMICOLON 
 
+	-- terminals
 	VARDEF_MODIFIER <- 'static' / 'const' / 'auto' / 'register'
 	ENDING_SEMICOLON <- S ';' S
 	UNUARY_OP <- [&-]
