@@ -151,12 +151,16 @@ local grammar = re.compile([[
 	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
 	PRIMITIVE <- 'char' / 'short' / 'int' / 'long' / 'float' / 'double'
 	JUMP <- 'return' / 'goto' / 'break' / 'continue'
+	SELECTION <- 'if' / 'else' / 'switch'
+	ITERATION <- 'while' / 'do' / 'for'
+	STORAGE <- 'auto' / 'register' / 'static'
+	LABEL <- 'case' / 'default'
 	IDENTIFIER <- (! KEYWORD ) [_%w][_%w%d]*
 	HEXCHAR <- [0-9a-fA-F]
 	SINGLE_LINE_COMMENT <- ('//' / '#') [^%nl]* %nl
 	MULTILINE_COMMENT <- '/*' ([^*] / ('*' !'/' ))* '*/'
 	COMMENT <- SINGLE_LINE_COMMENT / MULTILINE_COMMENT
-	KEYWORD <- PRIMITIVE / JUMP
+	KEYWORD <- PRIMITIVE / JUMP / SELECTION / ITERATION / LABEL / STORAGE
 	S <- (%s / COMMENT)*
 ]], {
 	hexadecimal_integer = function(str)
