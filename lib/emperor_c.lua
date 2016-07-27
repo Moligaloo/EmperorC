@@ -199,6 +199,17 @@ function session:load(filename)
 	return self.definitions
 end
 
+function session:show_definitions(format)
+	format = format or 'yaml'
+	if format == 'json' then
+		local json = require 'dkjson'
+		print(json.encode(self.definitions, {indent = true}))
+	elseif format == 'yaml' then
+		local yaml = require 'yaml'
+		print(yaml.dump(self.definitions))
+	end
+end
+
 local function map(list, func)
 	local mapped = {}
 	for _, elem in ipairs(list) do

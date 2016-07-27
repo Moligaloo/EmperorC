@@ -1,7 +1,8 @@
 local emperor = require 'lib.emperor_c'
 
 local session = emperor.session.new()
-local yaml = require 'yaml'
+session:load 'c/hello.c'
 
-print(yaml.dump(session:load 'c/hello.c'))
+session:show_definitions('json')
+
 
