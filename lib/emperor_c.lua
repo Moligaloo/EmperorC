@@ -109,7 +109,7 @@ local grammar = re.compile([[
 
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
-	function_body <- {| S '{' S statement* S '}' S |}
+	function_body <- {| S compound_statement S |}
 	expression <- call_expression / unary_expression / binary_expression / term
 	unary_expression <- {| {:op: UNUARY_OP :} S {:A: term :} |}
 	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: term :} |}
@@ -117,6 +117,7 @@ local grammar = re.compile([[
 
 	-- statements
 	statement <- jump_statement / assignment_statement / expression_statement / vardef_statement
+	compound_statement <- '{' S statement* S '}'
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
 	assignment_statement <- IDENTIFIER S '=' S expression ENDING_SEMICOLON
 	
