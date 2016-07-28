@@ -109,7 +109,7 @@ local grammar = re.compile([[
 	char_in_string <- ('\' {[abfnrtv"]} ) -> escaped_char_map / [^"] -> string_byte
 
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
-	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} '(' S {:parameters:parameters:} S ')'
+	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- {| S '{' S statement* S '}' S |}
 	expression <- call_expression / unary_expression / binary_expression / term
 	unary_expression <- {| {:op: UNUARY_OP :} S {:A: term :} |}
