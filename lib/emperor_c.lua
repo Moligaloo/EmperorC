@@ -169,7 +169,7 @@ local grammar = re.compile([[
 	S <- (%s / COMMENT)*
 ]], {
 	hexadecimal_integer = function(str)
-		return create_value('integer', tonumber(str, 16))
+		return create_value('integer', tonumber(str:sub(3), 16))
 	end,
 	decimal_integer = function(str)
 		return create_value('integer', tonumber(str))
