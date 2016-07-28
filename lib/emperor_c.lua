@@ -143,27 +143,31 @@ local grammar = re.compile([[
 	vardef_initializer <- '=' S {:initializer: expression :}
 	vardef_quad <- {| <vardef_stars>? S <vardef_name> S <vardef_bracket>? S <vardef_initializer>? |}
 	vardef_quads <- {| vardef_quad (S ',' S vardef_quad)* |}
-	vardef_modifier <- S {VARDEF_MODIFIER} S
+	vardef_modifier <- S {STORAGE} S
 	vardef_modifiers <- {| vardef_modifier+ |}
-	vardef <-  S {:modifiers:vardef_modifiers:}? S {:type: IDENTIFIER :} S {:quads: vardef_quads :} ENDING_SEMICOLON 
+	vardef <-  S {:modifiers:vardef_modifiers:}? S {:type: VAR_TYPE :} S {:quads: vardef_quads :} ENDING_SEMICOLON 
 
-	-- terminals
-	VARDEF_MODIFIER <- 'static' / 'const' / 'auto' / 'register'
-	ENDING_SEMICOLON <- S ';' S
-	UNUARY_OP <- [&-]
-	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
+	VOID <- 'void'
 	PRIMITIVE <- 'char' / 'short' / 'int' / 'long' / 'float' / 'double'
 	JUMP <- 'return' / 'goto' / 'break' / 'continue'
 	SELECTION <- 'if' / 'else' / 'switch'
 	ITERATION <- 'while' / 'do' / 'for'
-	STORAGE <- 'auto' / 'register' / 'static'
+	STORAGE <- 'auto' / 'register' / 'static' / 'const'
 	LABEL <- 'case' / 'default'
+	KEYWORD <- VOID / PRIMITIVE / JUMP / SELECTION / ITERATION / LABEL / STORAGE
 	IDENTIFIER <- (! KEYWORD ) [_%w][_%w%d]*
+
+	VAR_TYPE <- PRIMITIVE / IDENTIFIER
+	RETURN_TYPE <- VOID / VAR_TYPE
+
+	ENDING_SEMICOLON <- S ';' S
+	UNUARY_OP <- [&-]
+	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
+
 	HEXCHAR <- [0-9a-fA-F]
 	SINGLE_LINE_COMMENT <- ('//' / '#') [^%nl]* %nl
 	MULTILINE_COMMENT <- '/*' ([^*] / ('*' !'/' ))* '*/'
 	COMMENT <- SINGLE_LINE_COMMENT / MULTILINE_COMMENT
-	KEYWORD <- PRIMITIVE / JUMP / SELECTION / ITERATION / LABEL / STORAGE
 	S <- (%s / COMMENT)*
 ]], {
 	hexadecimal_integer = function(str)
