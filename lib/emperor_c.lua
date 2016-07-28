@@ -153,7 +153,7 @@ local grammar = re.compile([[
 	STORAGE <- 'auto' / 'register' / 'static' / 'const'
 	LABEL <- 'case' / 'default'
 	KEYWORD <- VOID / PRIMITIVE / JUMP / SELECTION / ITERATION / LABEL / STORAGE
-	IDENTIFIER <- (! KEYWORD ) [_%w][_%w%d]*
+	IDENTIFIER <- (! (KEYWORD %s) ) [_%w][_%w%d]*
 
 	VAR_TYPE <- PRIMITIVE / IDENTIFIER
 	RETURN_TYPE <- VOID / VAR_TYPE
