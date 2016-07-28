@@ -96,7 +96,6 @@ local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
 	definition <- function_definition / global_variable_definition
 	global_variable_definition <- {| {:definition: '' -> 'global' :} <vardef> |} 
-	type_specifier <- PRIMITIVE (S '*'+)?
 	static_initializer <- '=' S {: literal_value :}
 	literal_value <- float / integer / character / string
 	integer <- hexadecimal_integer / decimal_integer
@@ -133,7 +132,7 @@ local grammar = re.compile([[
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	arguments <- {| argument (S ',' S argument)* |} / ''
 	argument <- expression
-	parameter <- {| {:type: type_specifier :} S {:name: IDENTIFIER :} |}
+	parameter <- {| {:type: VAR_TYPE :} S {:quad:vardef_quad:} |} -> parameter
 	parameters <- {| parameter (S ',' S parameter)* |} / '' 
 
 	vardef_stars <- {:stars: [*]+ :}
@@ -191,7 +190,11 @@ local grammar = re.compile([[
 		return create_value('variable', t.name)
 	end,
 	escaped_char_map = escaped_char_map,
-	string_byte = string.byte
+	string_byte = string.byte,
+	parameter = function(t)
+		t.quad.type = t.type
+		return t.quad
+	end,
 })
 
 local session = {}
