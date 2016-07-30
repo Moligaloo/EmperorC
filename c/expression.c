@@ -35,4 +35,7 @@ int main(int argc, char **argv)
 	// p5 expression
 	a << 2;
 	a+1 >> 3;
+
+	i<a+b;
+	j>=a;
 }
