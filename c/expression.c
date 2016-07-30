@@ -61,4 +61,7 @@ int main(int argc, char **argv)
 
 	// p13 expression
 	a ? b : c;
+
+	// p14
+	a = b+c;
 }

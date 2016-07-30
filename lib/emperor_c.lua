@@ -113,7 +113,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
 
-	expression <- p13_expression
+	expression <- p14_expression
 	p0_expression <- 
 		literal_value 
 		/ variable 
@@ -182,6 +182,10 @@ local grammar = re.compile([[
 	p13_expression <-
 		{| {:type:''->'ternary':} {:condition:p12_expression:} S '?' S {:yes:p12_expression:} S ':' S {:no:p12_expression:} |}
 		/ p12_expression
+
+	p14_expression <-
+		{| {:left:p13_expression:} S {:type:'='->'assign':} S {:right:p14_expression:} |}
+		/ p13_expression
 
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	arguments <- {| argument (S ',' S argument)* |}
