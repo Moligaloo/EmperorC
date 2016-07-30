@@ -113,7 +113,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
 
-	expression <- p10_expression
+	expression <- p11_expression
 	p0_expression <- 
 		literal_value 
 		/ variable 
@@ -165,13 +165,16 @@ local grammar = re.compile([[
 	p7_operator <- '==' -> 'equal' / '!=' -> 'not_equal'
 
 	p8_expression <- {| {:left:p7_expression:} {:suffixes: {| p8_suffix+ |} :}? |} -> common_tree
-	p8_suffix <- {| S {:type: '&' -> 'bitwise_and' :} S {:right:p7_expression:} |}
+	p8_suffix <- {| S {:type: ('&' (![&]) ) -> 'bitwise_and' :} S {:right:p7_expression:} |}
 
 	p9_expression <- {| {:left:p8_expression:} {:suffixes: {| p9_suffix+ |} :}? |} -> common_tree
 	p9_suffix <- {| S {:type: '^' -> 'bitwise_xor' :} S {:right:p8_expression:} |}
 
 	p10_expression <- {| {:left:p9_expression:} {:suffixes: {| p10_suffix+ |} :}? |} -> common_tree
 	p10_suffix <- {| S {:type: '|' -> 'bitwise_or' :} S {:right:p9_expression:} |}
+
+	p11_expression <- {| {:left:p10_expression:} {:suffixes: {| p11_suffix+ |} :}? |} -> common_tree
+	p11_suffix <- {| S {:type: '&&' -> 'logic_and' :} S {:right:p10_expression:} |}
 
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
