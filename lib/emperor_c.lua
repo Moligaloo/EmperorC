@@ -113,7 +113,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
 
-	expression <- p6_expression
+	expression <- p7_expression
 	p0_expression <- 
 		literal_value 
 		/ variable 
@@ -159,6 +159,10 @@ local grammar = re.compile([[
 		/ '<' -> 'less'
 		/ '>=' -> 'greater_equal'
 		/ '>' -> 'greater'
+
+	p7_expression <- {| {:left:p6_expression:} {:suffixes: {| p7_suffix+ |} :}? |} -> common_tree
+	p7_suffix <- {| S {:type: p7_operator :} S {:right:p6_expression:} |}
+	p7_operator <- '==' -> 'equal' / '!=' -> 'not_equal'
 
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable

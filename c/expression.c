@@ -38,4 +38,7 @@ int main(int argc, char **argv)
 
 	i<a+b;
 	j>=a;
+
+	a==b;
+	c!=d;
 }
