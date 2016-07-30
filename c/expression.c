@@ -36,9 +36,14 @@ int main(int argc, char **argv)
 	a << 2;
 	a+1 >> 3;
 
+	// p6 expression
 	i<a+b;
 	j>=a;
 
+	// p7 expression
 	a==b;
 	c!=d;
+
+	// p8 expression
+	a & b & c;
 }
