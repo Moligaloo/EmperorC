@@ -31,4 +31,8 @@ int main(int argc, char **argv)
 
 	// p4 expression
 	a+b*c-d;
+
+	// p5 expression
+	a << 2;
+	a+1 >> 3;
 }

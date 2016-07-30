@@ -1,265 +1,300 @@
 [
     {
-        "name": "main",
         "parameters": [
             {
-                "type": "int",
-                "name": "argc"
+                "name": "argc",
+                "type": "int"
             },
             {
-                "stars": "**",
+                "type": "char",
                 "name": "argv",
-                "type": "char"
+                "stars": "**"
+            }
+        ],
+        "return_type": "int",
+        "body": [
+            {
+                "expression": {
+                    "type": "variable",
+                    "value": "a"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "string",
+                    "value": "hello"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "integer",
+                    "value": 123
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "call",
+                    "function": {
+                        "ref": {
+                            "ref": {
+                                "ref": {
+                                    "type": "variable",
+                                    "value": "a"
+                                },
+                                "type": "dot",
+                                "member": "b"
+                            },
+                            "type": "arrow",
+                            "member": "c"
+                        },
+                        "type": "subscript",
+                        "subscript": {
+                            "type": "integer",
+                            "value": 0
+                        }
+                    }
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "ref": {
+                        "type": "variable",
+                        "value": "i"
+                    },
+                    "type": "post_increment"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "ref": {
+                        "type": "variable",
+                        "value": "j"
+                    },
+                    "type": "post_decrement"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "pre_increment",
+                    "expression": {
+                        "type": "variable",
+                        "value": "x"
+                    }
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "pre_decrement",
+                    "expression": {
+                        "type": "variable",
+                        "value": "x"
+                    }
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "negate",
+                    "expression": {
+                        "type": "variable",
+                        "value": "x"
+                    }
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "integer",
+                    "value": -1
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "not",
+                    "expression": {
+                        "type": "variable",
+                        "value": "a"
+                    }
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "expression": {
+                        "type": "variable",
+                        "value": "x"
+                    },
+                    "type": "cast",
+                    "cast": "int"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "deref",
+                    "expression": {
+                        "type": "variable",
+                        "value": "a"
+                    }
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "addr",
+                    "expression": {
+                        "type": "variable",
+                        "value": "var"
+                    }
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "sizeof",
+                    "expression": {
+                        "type": "variable",
+                        "value": "a"
+                    }
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "type": "sizeof",
+                    "vartype": "int"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "right": {
+                        "type": "variable",
+                        "value": "c"
+                    },
+                    "left": {
+                        "right": {
+                            "type": "variable",
+                            "value": "b"
+                        },
+                        "left": {
+                            "type": "variable",
+                            "value": "a"
+                        },
+                        "type": "multiply"
+                    },
+                    "type": "modular"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "right": {
+                        "type": "variable",
+                        "value": "z"
+                    },
+                    "left": {
+                        "right": {
+                            "type": "variable",
+                            "value": "y"
+                        },
+                        "left": {
+                            "type": "variable",
+                            "value": "x"
+                        },
+                        "type": "modular"
+                    },
+                    "type": "multiply"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "right": {
+                        "type": "variable",
+                        "value": "b"
+                    },
+                    "left": {
+                        "type": "variable",
+                        "value": "a"
+                    },
+                    "type": "modular"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "right": {
+                        "type": "variable",
+                        "value": "d"
+                    },
+                    "left": {
+                        "right": {
+                            "right": {
+                                "type": "variable",
+                                "value": "c"
+                            },
+                            "left": {
+                                "type": "variable",
+                                "value": "b"
+                            },
+                            "type": "multiply"
+                        },
+                        "left": {
+                            "type": "variable",
+                            "value": "a"
+                        },
+                        "type": "add"
+                    },
+                    "type": "subtract"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "right": {
+                        "type": "integer",
+                        "value": 2
+                    },
+                    "left": {
+                        "type": "variable",
+                        "value": "a"
+                    },
+                    "type": "left_shift"
+                },
+                "statement": "expression"
+            },
+            {
+                "expression": {
+                    "right": {
+                        "type": "integer",
+                        "value": 3
+                    },
+                    "left": {
+                        "right": {
+                            "type": "integer",
+                            "value": 1
+                        },
+                        "left": {
+                            "type": "variable",
+                            "value": "a"
+                        },
+                        "type": "add"
+                    },
+                    "type": "right_shift"
+                },
+                "statement": "expression"
             }
         ],
         "definition": "function",
-        "body": [
-            {
-                "statement": "expression",
-                "expression": {
-                    "value": "a",
-                    "type": "variable"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "value": "hello",
-                    "type": "string"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "value": 123,
-                    "type": "integer"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "function": {
-                        "subscript": {
-                            "value": 0,
-                            "type": "integer"
-                        },
-                        "type": "subscript",
-                        "ref": {
-                            "type": "arrow",
-                            "member": "c",
-                            "ref": {
-                                "type": "dot",
-                                "member": "b",
-                                "ref": {
-                                    "value": "a",
-                                    "type": "variable"
-                                }
-                            }
-                        }
-                    },
-                    "type": "call"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "type": "post_increment",
-                    "ref": {
-                        "value": "i",
-                        "type": "variable"
-                    }
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "type": "post_decrement",
-                    "ref": {
-                        "value": "j",
-                        "type": "variable"
-                    }
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "expression": {
-                        "value": "x",
-                        "type": "variable"
-                    },
-                    "type": "pre_increment"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "expression": {
-                        "value": "x",
-                        "type": "variable"
-                    },
-                    "type": "pre_decrement"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "expression": {
-                        "value": "x",
-                        "type": "variable"
-                    },
-                    "type": "negate"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "value": -1,
-                    "type": "integer"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "expression": {
-                        "value": "a",
-                        "type": "variable"
-                    },
-                    "type": "not"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "type": "cast",
-                    "cast": "int",
-                    "expression": {
-                        "value": "x",
-                        "type": "variable"
-                    }
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "expression": {
-                        "value": "a",
-                        "type": "variable"
-                    },
-                    "type": "deref"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "expression": {
-                        "value": "var",
-                        "type": "variable"
-                    },
-                    "type": "addr"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "expression": {
-                        "value": "a",
-                        "type": "variable"
-                    },
-                    "type": "sizeof"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "vartype": "int",
-                    "type": "sizeof"
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "left": {
-                        "left": {
-                            "value": "a",
-                            "type": "variable"
-                        },
-                        "type": "multiply",
-                        "right": {
-                            "value": "b",
-                            "type": "variable"
-                        }
-                    },
-                    "type": "modular",
-                    "right": {
-                        "value": "c",
-                        "type": "variable"
-                    }
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "left": {
-                        "left": {
-                            "value": "x",
-                            "type": "variable"
-                        },
-                        "type": "modular",
-                        "right": {
-                            "value": "y",
-                            "type": "variable"
-                        }
-                    },
-                    "type": "multiply",
-                    "right": {
-                        "value": "z",
-                        "type": "variable"
-                    }
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "left": {
-                        "value": "a",
-                        "type": "variable"
-                    },
-                    "type": "modular",
-                    "right": {
-                        "value": "b",
-                        "type": "variable"
-                    }
-                }
-            },
-            {
-                "statement": "expression",
-                "expression": {
-                    "left": {
-                        "left": {
-                            "value": "a",
-                            "type": "variable"
-                        },
-                        "type": "add",
-                        "right": {
-                            "left": {
-                                "value": "b",
-                                "type": "variable"
-                            },
-                            "type": "multiply",
-                            "right": {
-                                "value": "c",
-                                "type": "variable"
-                            }
-                        }
-                    },
-                    "type": "subtract",
-                    "right": {
-                        "value": "d",
-                        "type": "variable"
-                    }
-                }
-            }
-        ],
-        "return_type": "int"
+        "name": "main"
     }
 ]
