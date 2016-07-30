@@ -124,14 +124,14 @@ local grammar = re.compile([[
 		{| {:tail: '' -> 'subscript' :} BRACKET_L {:subscript:expression:} BRACKET_R |}
 		/ {| {:tail: '' -> 'dot' :} S '.' S {:member:IDENTIFIER:} |}
 		/ {| {:tail: '' -> 'arrow':} S '->' S {:member:IDENTIFIER:} |}
-		/ {| {:tail: '' -> 'call':} PAREN_L {:arguments:arguments:} PAREN_R |} 
+		/ {| {:tail: '' -> 'call':} PAREN_L {:arguments:arguments:}? PAREN_R |} 
 		/ {| {:tail: '++' -> 'increment' :} |}
 		/ {| {:tail: '--' -> 'decrement' :} |}
 
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 
-	arguments <- {| argument (S ',' S argument)* |} / S
+	arguments <- {| argument (S ',' S argument)* |}
 	argument <- expression
 
 	-- statements
