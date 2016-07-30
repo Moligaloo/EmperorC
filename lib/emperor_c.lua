@@ -116,10 +116,9 @@ local grammar = re.compile([[
 	call_expression <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 
 	-- statements
-	statement <- jump_statement / assignment_statement / expression_statement / vardef_statement
+	statement <- compound_statement / jump_statement / expression_statement / vardef_statement
 	compound_statement <- '{' S statement* S '}'
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
-	assignment_statement <- IDENTIFIER S '=' S expression ENDING_SEMICOLON
 	
 	jump_statement <- {| {:statement: '' -> 'jump' :} <jump_action> ENDING_SEMICOLON |}
 	jump_action <- jump_goto / jump_continue / jump_break / jump_return
@@ -161,7 +160,7 @@ local grammar = re.compile([[
 
 	ENDING_SEMICOLON <- S ';' S
 	UNUARY_OP <- [&-]
-	BINARY_OP <- [<>*/+-] / '==' / '!=' / '>=' / '<='
+	BINARY_OP <- [<>*/+-] / '==' / '=' / '!=' / '>=' / '<='
 
 	HEXCHAR <- [0-9a-fA-F]
 	SINGLE_LINE_COMMENT <- ('//' / '#') [^%nl]* %nl
