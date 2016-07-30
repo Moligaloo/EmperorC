@@ -1,0 +1,86 @@
+[
+   {
+      "parameters" : [
+         {
+            "name" : "argc",
+            "type" : "int"
+         },
+         {
+            "stars" : "**",
+            "name" : "argv",
+            "type" : "char"
+         }
+      ],
+      "definition" : "function",
+      "return_type" : "int",
+      "name" : "main",
+      "body" : [
+         {
+            "statement" : "expression",
+            "expression" : {
+               "value" : "a",
+               "type" : "variable"
+            }
+         },
+         {
+            "statement" : "expression",
+            "expression" : {
+               "type" : "string",
+               "value" : "hello"
+            }
+         },
+         {
+            "statement" : "expression",
+            "expression" : {
+               "value" : 123,
+               "type" : "integer"
+            }
+         },
+         {
+            "expression" : {
+               "function" : {
+                  "ref" : {
+                     "ref" : {
+                        "type" : "dot",
+                        "ref" : {
+                           "type" : "variable",
+                           "value" : "a"
+                        },
+                        "member" : "b"
+                     },
+                     "type" : "arrow",
+                     "member" : "c"
+                  },
+                  "type" : "subscript",
+                  "subscript" : {
+                     "value" : 0,
+                     "type" : "integer"
+                  }
+               },
+               "type" : "call"
+            },
+            "statement" : "expression"
+         },
+         {
+            "expression" : {
+               "ref" : {
+                  "type" : "variable",
+                  "value" : "i"
+               },
+               "type" : "increment"
+            },
+            "statement" : "expression"
+         },
+         {
+            "expression" : {
+               "ref" : {
+                  "type" : "variable",
+                  "value" : "j"
+               },
+               "type" : "decrement"
+            },
+            "statement" : "expression"
+         }
+      ]
+   }
+]

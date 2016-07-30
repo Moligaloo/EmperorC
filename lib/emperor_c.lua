@@ -119,14 +119,14 @@ local grammar = re.compile([[
 		/ variable 
 		/ PAREN_L expression PAREN_R
 	p1_expression <- 
-		{| {:primary:p0_expression:} {:tails: {| p1_tail+ |} :}? |} -> p1_tree
-	p1_tail <- 
-		{| {:tail: '' -> 'subscript' :} BRACKET_L {:subscript:expression:} BRACKET_R |}
-		/ {| {:tail: '' -> 'dot' :} S '.' S {:member:IDENTIFIER:} |}
-		/ {| {:tail: '' -> 'arrow':} S '->' S {:member:IDENTIFIER:} |}
-		/ {| {:tail: '' -> 'call':} PAREN_L {:arguments:arguments:}? PAREN_R |} 
-		/ {| {:tail: '++' -> 'increment' :} |}
-		/ {| {:tail: '--' -> 'decrement' :} |}
+		{| {:primary:p0_expression:} {:postfixes: {| p1_postfix+ |} :}? |} -> p1_tree
+	p1_postfix <- 
+		{| {:postfix: '' -> 'subscript' :} BRACKET_L {:subscript:expression:} BRACKET_R |}
+		/ {| {:postfix: '' -> 'dot' :} S '.' S {:member:IDENTIFIER:} |}
+		/ {| {:postfix: '' -> 'arrow':} S '->' S {:member:IDENTIFIER:} |}
+		/ {| {:postfix: '' -> 'call':} PAREN_L {:arguments:arguments:}? PAREN_R |} 
+		/ {| {:postfix: '++' -> 'increment' :} |}
+		/ {| {:postfix: '--' -> 'decrement' :} |}
 
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
@@ -225,27 +225,27 @@ local grammar = re.compile([[
 	end,
 	p1_tree = function(p1)
 		local tree = p1.primary
-		local tails = p1.tails
-		if tails then
-			for _, tail in ipairs(tails) do
-				local type = tail.tail
+		local postfixes = p1.postfixes
+		if postfixes then
+			for _, postfix in ipairs(postfixes) do
+				local type = postfix.postfix
 				if type == 'call' then
 					tree = {
 						type = 'call',
 						['function'] = tree,
-						arguments = tail.arguments
+						arguments = postfix.arguments
 					}
 				elseif type == 'dot' or type == 'arrow' or type == 'increment' or type == 'decrement' then
 					tree = {
 						type = type,
 						ref = tree,
-						member = tail.member
+						member = postfix.member
 					}
 				elseif type == 'subscript' then
 					tree = {
 						type = 'subscript',
 						ref = tree,
-						subscript = tail.subscript
+						subscript = postfix.subscript
 					}
 				end
 			end

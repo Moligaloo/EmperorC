@@ -9,7 +9,7 @@ function io_read(filename)
 	return content
 end
 
-for _, file in ipairs{'hello', 'globals', 'while'} do
+for _, file in ipairs{'hello', 'globals', 'while', 'expression'} do
 	it("Testing file " .. file, function() 
 		local c_source = ("c/%s.c"):format(file)
 		local json_source = io_read(("ast/%s.json"):format(file))
