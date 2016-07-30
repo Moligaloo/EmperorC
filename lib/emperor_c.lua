@@ -125,6 +125,8 @@ local grammar = re.compile([[
 		/ {| {:tail: '' -> 'dot' :} S '.' S {:member:IDENTIFIER:} |}
 		/ {| {:tail: '' -> 'arrow':} S '->' S {:member:IDENTIFIER:} |}
 		/ {| {:tail: '' -> 'call':} PAREN_L {:arguments:arguments:} PAREN_R |} 
+		/ {| {:tail: '++' -> 'increment' :} |}
+		/ {| {:tail: '--' -> 'decrement' :} |}
 
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
@@ -233,7 +235,7 @@ local grammar = re.compile([[
 						['function'] = tree,
 						arguments = tail.arguments
 					}
-				elseif type == 'dot' or type == 'arrow' then
+				elseif type == 'dot' or type == 'arrow' or type == 'increment' or type == 'decrement' then
 					tree = {
 						type = type,
 						ref = tree,
