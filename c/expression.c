@@ -46,4 +46,7 @@ int main(int argc, char **argv)
 
 	// p8 expression
 	a & b & c;
+
+	// p9 expression
+	a ^ b;
 }
