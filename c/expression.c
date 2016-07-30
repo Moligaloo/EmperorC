@@ -49,4 +49,7 @@ int main(int argc, char **argv)
 
 	// p9 expression
 	a ^ b;
+
+	// p10 expression
+	a | b;
 }
