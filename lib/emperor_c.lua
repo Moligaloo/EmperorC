@@ -114,12 +114,12 @@ local grammar = re.compile([[
 	function_body <- (S compound_statement S) -> flat_compound
 
 	expression <- p1_expression
-	primary_expression <- 
+	p0_expression <- 
 		literal_value 
 		/ variable 
 		/ PAREN_L expression PAREN_R
 	p1_expression <- 
-		{| {:primary:primary_expression:} {:tails: {| p1_tail+ |} :}? |} -> p1_tree
+		{| {:primary:p0_expression:} {:tails: {| p1_tail+ |} :}? |} -> p1_tree
 	p1_tail <- 
 		{| {:tail: '' -> 'subscript' :} BRACKET_L {:subscript:expression:} BRACKET_R |}
 		/ {| {:tail: '' -> 'dot' :} S '.' S {:member:IDENTIFIER:} |}
