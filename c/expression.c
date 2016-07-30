@@ -58,4 +58,7 @@ int main(int argc, char **argv)
 
 	// p12 expression
 	a || b;
+
+	// p13 expression
+	a ? b : c;
 }
