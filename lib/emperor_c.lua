@@ -129,15 +129,16 @@ local grammar = re.compile([[
 		/ {| {:postfix: '--' -> 'post_decrement' :} |}
 	p2_expression <-
 		p1_expression
-		/ {| {:prefixes: {| p2_prefix+ |} :} {:p2: p2_expression :} |} -> p2_tree
-	p2_prefix <-
-		{| S {:prefix: '++' -> 'pre_increment' :} S |}
-		/ {| S {:prefix: '--' -> 'pre_decrement' :} S |}
-		/ {| S {:prefix: '-' -> 'negate' :} S |}
-		/ {| PAREN_L {:prefix: '' -> 'cast' :} {:cast:VAR_TYPE:} PAREN_R |}  
-		/ {| S {:prefix: '*' -> 'deref' :} S |}
-		/ {| S {:prefix: '&' -> 'addr' :} S |}
-		/ {| S {:prefix: 'sizeof':} S |}
+		/ {| {:type: '++' -> 'pre_increment' :} S {:expression:p2_expression:} |}
+		/ {| {:type: '--' -> 'pre_decrement' :} S {:expression:p2_expression:} |}
+		/ {| {:type: '-' -> 'negate' :} S {:expression:p2_expression:} |} -> negate_number
+		/ {| {:type: '!' -> 'not' :} S {:expression:p2_expression:} |}
+		/ {| {:type: '~' -> 'complement' :} S {:expression:p2_expression:} |}
+		/ {| {:type: '' -> 'cast' :} PAREN_L {:cast:VAR_TYPE:} PAREN_R {:expression:p2_expression:} |}
+		/ {| {:type: '*' -> 'deref' :} S {:expression:p2_expression:} |}
+		/ {| {:type: '&' -> 'addr' :} S {:expression:p2_expression:} |}
+		/ {| {:type: 'sizeof' :} S {:expression:expression:} |}
+		/ {| {:type: 'sizeof' :} S {:vartype:VAR_TYPE:} |}
 
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
@@ -265,23 +266,13 @@ local grammar = re.compile([[
 
 		return tree
 	end,
-	p2_tree = function(p2)
-		local tree = p2.p2
-		for _, prefix in ipairs(p2.prefixes) do
-			if prefix.prefix == 'cast' then
-				tree = {
-					type = 'cast',
-					expression = tree,
-					cast = prefix.cast
-				}
-			else
-				tree = {
-					type = prefix.prefix,
-					expression = tree
-				}
-			end
+	negate_number = function(p2)
+		local p2_expression = p2.expression
+		if p2_expression.type == 'float' or p2_expression.type == 'integer' then
+			p2_expression.value = -p2_expression.value
+			return p2_expression
 		end
-		return tree
+		return p2
 	end,
 })
 

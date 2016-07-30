@@ -13,10 +13,14 @@ int main(int argc, char **argv)
 	j--;
 
 	// p2 expression
-	++x;
+	++(x);
 	--x;
 	-x;
-	*ptr;
-	&var;
+	-1;
+	!a;	
 	(int)x;
+	*(a);
+	&var;
+	sizeof(a);
+	sizeof int;
 }
