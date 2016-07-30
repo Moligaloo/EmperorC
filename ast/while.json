@@ -1,73 +1,91 @@
 [
-   {
-      "name" : "main",
-      "body" : [
-         {
-            "iteration" : "while",
-            "body" : {
-               "statements" : [
-                  {
-                     "statement" : "expression",
-                     "expression" : {
-                        "arguments" : [
-                           {
-                              "type" : "string",
-                              "value" : "hello"
-                           }
-                        ],
-                        "function" : {
-                           "type" : "variable",
-                           "value" : "printf"
-                        },
-                        "type" : "call"
-                     }
-                  },
-                  {
-                     "expression" : {
-                        "arguments" : [
-                           {
-                              "value" : "world\n",
-                              "type" : "string"
-                           }
-                        ],
-                        "function" : {
-                           "value" : "printf",
-                           "type" : "variable"
-                        },
-                        "type" : "call"
-                     },
-                     "statement" : "expression"
-                  }
-               ],
-               "statement" : "compound"
+    {
+        "name": "main",
+        "definition": "function",
+        "body": [
+            {
+                "type": "int",
+                "statement": "vardef",
+                "quads": [
+                    {
+                        "name": "i",
+                        "initializer": {
+                            "type": "integer",
+                            "value": 0
+                        }
+                    }
+                ]
             },
-            "statement" : "iteration",
-            "condition" : {
-               "type" : "integer",
-               "value" : 1
+            {
+                "iteration": "while",
+                "body": {
+                    "statement": "compound",
+                    "statements": [
+                        {
+                            "statement": "expression",
+                            "expression": {
+                                "type": "call",
+                                "arguments": [
+                                    {
+                                        "type": "string",
+                                        "value": "%d"
+                                    },
+                                    {
+                                        "type": "variable",
+                                        "value": "i"
+                                    }
+                                ],
+                                "function": {
+                                    "type": "variable",
+                                    "value": "printf"
+                                }
+                            }
+                        },
+                        {
+                            "statement": "expression",
+                            "expression": {
+                                "type": "post_increment",
+                                "ref": {
+                                    "type": "variable",
+                                    "value": "i"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "statement": "iteration",
+                "condition": {
+                    "left": {
+                        "type": "variable",
+                        "value": "i"
+                    },
+                    "right": {
+                        "type": "integer",
+                        "value": 10
+                    },
+                    "type": "less"
+                }
+            },
+            {
+                "value": {
+                    "type": "integer",
+                    "value": 0
+                },
+                "jump": "return",
+                "statement": "jump"
             }
-         },
-         {
-            "statement" : "jump",
-            "jump" : "return",
-            "value" : {
-               "type" : "integer",
-               "value" : 0
+        ],
+        "parameters": [
+            {
+                "name": "argc",
+                "type": "int"
+            },
+            {
+                "name": "argv",
+                "type": "char",
+                "stars": "**"
             }
-         }
-      ],
-      "parameters" : [
-         {
-            "type" : "int",
-            "name" : "argc"
-         },
-         {
-            "type" : "char",
-            "stars" : "**",
-            "name" : "argv"
-         }
-      ],
-      "definition" : "function",
-      "return_type" : "int"
-   }
+        ],
+        "return_type": "int"
+    }
 ]
