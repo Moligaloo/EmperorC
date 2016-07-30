@@ -55,4 +55,7 @@ int main(int argc, char **argv)
 
 	// p11 expression, &&
 	a && b;
+
+	// p12 expression
+	a || b;
 }
