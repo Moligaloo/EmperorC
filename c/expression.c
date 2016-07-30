@@ -23,4 +23,9 @@ int main(int argc, char **argv)
 	&var;
 	sizeof(a);
 	sizeof int;
+
+	// p3 expression
+	(a*b%c);
+	(x%y*z);
+	(a%b);
 }

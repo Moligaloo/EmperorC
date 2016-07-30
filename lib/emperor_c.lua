@@ -113,7 +113,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
 
-	expression <- p2_expression
+	expression <- p3_expression
 	p0_expression <- 
 		literal_value 
 		/ variable 
@@ -139,7 +139,14 @@ local grammar = re.compile([[
 		/ {| {:type: '&' -> 'addr' :} S {:expression:p2_expression:} |}
 		/ {| {:type: 'sizeof' :} S {:expression:expression:} |}
 		/ {| {:type: 'sizeof' :} S {:vartype:VAR_TYPE:} |}
-
+	p3_expression <-
+		{| {:left:p2_expression:} {:suffixes: {| p3_suffix+ |} :}? |} -> p3_tree
+	p3_suffix <-
+		{| S {:type: p3_operator :} S {:right:p2_expression:} |}
+	p3_operator <-
+		'*' -> 'multiply'
+		/ '%' -> 'modular'
+ 
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 
@@ -147,7 +154,7 @@ local grammar = re.compile([[
 	argument <- expression
 
 	-- statements
-	statement <- compound_statement / jump_statement / expression_statement / vardef_statement / iteration_statement
+	statement <- compound_statement / jump_statement / vardef_statement / expression_statement / iteration_statement
 	compound_statement <- {| {:statement: '' -> 'compound' :} BRACE_L {:statements:statements:} BRACE_R |}
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
 	iteration_statement <- {| {:statement: '' -> 'iteration' :} <iteration_while> |}
@@ -273,6 +280,23 @@ local grammar = re.compile([[
 			return p2_expression
 		end
 		return p2
+	end,
+	p3_tree = function(p3)
+		if p3.suffixes == nil then
+			return p3.left
+		end
+
+		local left = p3.left
+		local expression
+		for _, suffix in ipairs(p3.suffixes) do
+			expression = {
+				left = left,
+				type = suffix.type,
+				right = suffix.right
+			}
+			left = expression
+		end
+		return expression
 	end,
 })
 
