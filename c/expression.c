@@ -28,4 +28,7 @@ int main(int argc, char **argv)
 	(a*b%c);
 	(x%y*z);
 	(a%b);
+
+	// p4 expression
+	a+b*c-d;
 }

@@ -113,7 +113,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
 
-	expression <- p3_expression
+	expression <- p4_expression
 	p0_expression <- 
 		literal_value 
 		/ variable 
@@ -139,14 +139,15 @@ local grammar = re.compile([[
 		/ {| {:type: '&' -> 'addr' :} S {:expression:p2_expression:} |}
 		/ {| {:type: 'sizeof' :} S {:expression:expression:} |}
 		/ {| {:type: 'sizeof' :} S {:vartype:VAR_TYPE:} |}
-	p3_expression <-
-		{| {:left:p2_expression:} {:suffixes: {| p3_suffix+ |} :}? |} -> p3_tree
-	p3_suffix <-
-		{| S {:type: p3_operator :} S {:right:p2_expression:} |}
-	p3_operator <-
-		'*' -> 'multiply'
-		/ '%' -> 'modular'
- 
+
+	p3_expression <- {| {:left:p2_expression:} {:suffixes: {| p3_suffix+ |} :}? |} -> common_tree
+	p3_suffix <- {| S {:type: p3_operator :} S {:right:p2_expression:} |}
+	p3_operator <- '*' -> 'multiply' / '%' -> 'modular'
+
+	p4_expression <- {| {:left:p3_expression:} {:suffixes: {| p4_suffix+ |} :}? |} -> common_tree
+	p4_suffix <- {| S {:type: p4_operator :} S {:right:p3_expression:} |}
+	p4_operator <- '+' -> 'add' / '-' -> 'subtract'
+
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 
@@ -281,14 +282,14 @@ local grammar = re.compile([[
 		end
 		return p2
 	end,
-	p3_tree = function(p3)
-		if p3.suffixes == nil then
-			return p3.left
+	common_tree = function(t)
+		if t.suffixes == nil then
+			return t.left
 		end
 
-		local left = p3.left
+		local left = t.left
 		local expression
-		for _, suffix in ipairs(p3.suffixes) do
+		for _, suffix in ipairs(t.suffixes) do
 			expression = {
 				left = left,
 				type = suffix.type,
