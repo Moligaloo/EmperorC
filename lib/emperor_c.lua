@@ -97,6 +97,8 @@ local grammar = re.compile([[
 	definition <- function_definition / global_variable_definition
 	global_variable_definition <- {| {:definition: '' -> 'global' :} <vardef> |} 
 	static_initializer <- '=' S {: literal_value :}
+
+	-- literal value
 	literal_value <- float / integer / character / string
 	integer <- hexadecimal_integer / decimal_integer
 	hexadecimal_integer <- ('0x' HEXCHAR+) -> hexadecimal_integer
@@ -110,20 +112,24 @@ local grammar = re.compile([[
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
-	expression <- 
-		binary_expression 
-		/ term
-		/ (PAREN_L expression PAREN_R)
-	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: expression :} |}
-	term <- 
+
+	expression <- p1_expression
+	primary_expression <- 
 		literal_value 
-		/ function_call 
-		/ variable
-		/ prefix_term
-	prefix_term <- {| {:op: PREFIX_OP :} S {:A: term :} |}
+		/ variable 
+		/ PAREN_L expression PAREN_R
+	p1_expression <- 
+		{| {:primary:primary_expression:} {:tails: {| p1_tail+ |} :}? |} -> p1_tree
+	p1_tail <- 
+		{| {:tail: '' -> 'subscript' :} BRACKET_L {:subscript:expression:} BRACKET_R |}
+		/ {| {:tail: '' -> 'dot' :} S '.' S {:member:IDENTIFIER:} |}
+		/ {| {:tail: '' -> 'arrow':} S '->' S {:member:IDENTIFIER:} |}
+		/ {| {:tail: '' -> 'call':} PAREN_L {:arguments:arguments:} PAREN_R |} 
+
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
-	arguments <- {| argument (S ',' S argument)* |} / ''
+
+	arguments <- {| argument (S ',' S argument)* |} / S
 	argument <- expression
 
 	-- statements
@@ -182,6 +188,8 @@ local grammar = re.compile([[
 	PAREN_R <- S ')' S
 	BRACE_L <- S '{' S
 	BRACE_R <- S '}' S
+	BRACKET_L <- S '[' S
+	BRACKET_R <- S ']' S
 ]], {
 	hexadecimal_integer = function(str)
 		return create_value('integer', tonumber(str:sub(3), 16))
@@ -212,7 +220,37 @@ local grammar = re.compile([[
 	end,
 	flat_compound = function(compound_statement)
 		return compound_statement.statements
-	end
+	end,
+	p1_tree = function(p1)
+		local tree = p1.primary
+		local tails = p1.tails
+		if tails then
+			for _, tail in ipairs(tails) do
+				local type = tail.tail
+				if type == 'call' then
+					tree = {
+						type = 'call',
+						['function'] = tree,
+						arguments = tail.arguments
+					}
+				elseif type == 'dot' or type == 'arrow' then
+					tree = {
+						type = type,
+						ref = tree,
+						member = tail.member
+					}
+				elseif type == 'subscript' then
+					tree = {
+						type = 'subscript',
+						ref = tree,
+						subscript = tail.subscript
+					}
+				end
+			end
+		end
+
+		return tree
+	end,
 })
 
 local session = {}

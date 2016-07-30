@@ -1,30 +1,44 @@
-[{
-    "return_type":"int",
-    "definition":"function",
-    "parameters":[{
-        "type":"int",
-        "name":"argc"
-      },{
-        "type":"char",
-        "stars":"**",
-        "name":"argv"
-      }],
-    "body":[{
-        "statement":"expression",
-        "expression":{
-          "arguments":[{
-              "type":"string",
-              "value":"hello,world\n"
-            }],
-          "function_name":"printf"
-        }
-      },{
-        "jump":"return",
-        "statement":"jump",
-        "value":{
-          "type":"integer",
-          "value":0
-        }
-      }],
-    "name":"main"
-  }]
+[
+   {
+      "name" : "main",
+      "return_type" : "int",
+      "parameters" : [
+         {
+            "name" : "argc",
+            "type" : "int"
+         },
+         {
+            "name" : "argv",
+            "type" : "char",
+            "stars" : "**"
+         }
+      ],
+      "body" : [
+         {
+            "expression" : {
+               "type" : "call",
+               "function" : {
+                  "value" : "printf",
+                  "type" : "variable"
+               },
+               "arguments" : [
+                  {
+                     "value" : "hello,world\n",
+                     "type" : "string"
+                  }
+               ]
+            },
+            "statement" : "expression"
+         },
+         {
+            "value" : {
+               "value" : 0,
+               "type" : "integer"
+            },
+            "jump" : "return",
+            "statement" : "jump"
+         }
+      ],
+      "definition" : "function"
+   }
+]

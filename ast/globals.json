@@ -1,131 +1,175 @@
-[{
-    "quads":[{
-        "name":"a"
-      }],
-    "type":"int",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"b",
-        "initializer":{
-          "type":"integer",
-          "value":1
-        }
-      }],
-    "type":"int",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"c",
-        "initializer":{
-          "type":"integer",
-          "value":1
-        }
-      },{
-        "name":"d",
-        "initializer":{
-          "type":"integer",
-          "value":2
-        }
-      }],
-    "type":"int",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"f",
-        "initializer":{
-          "type":"float",
-          "value":1.2
-        }
-      }],
-    "type":"float",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"newline",
-        "initializer":{
-          "type":"character",
-          "value":10
-        }
-      }],
-    "type":"char",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"hex",
-        "initializer":{
-          "type":"integer",
-          "value":18
-        }
-      }],
-    "type":"int",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"c",
-        "initializer":{
-          "type":"character",
-          "value":97
-        }
-      }],
-    "type":"char",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"single_quote",
-        "initializer":{
-          "type":"character",
-          "value":39
-        }
-      }],
-    "type":"char",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"double_quote",
-        "initializer":{
-          "type":"character",
-          "value":34
-        }
-      }],
-    "type":"char",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"str",
-        "initializer":{
-          "type":"string",
-          "value":"hello,world"
-        },
-        "stars":"*"
-      }],
-    "type":"char",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"a",
-        "array_count":{
-          "type":"integer",
-          "value":10
-        }
-      }],
-    "type":"int",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"custom_variable"
-      }],
-    "type":"custom_type",
-    "definition":"global"
-  },{
-    "quads":[{
-        "name":"pi",
-        "initializer":{
-          "type":"float",
-          "value":3.1415926
-        }
-      }],
-    "type":"float",
-    "modifiers":["const","static"],
-    "definition":"global"
-  }]
+[
+   {
+      "quads" : [
+         {
+            "name" : "a"
+         }
+      ],
+      "type" : "int",
+      "definition" : "global"
+   },
+   {
+      "definition" : "global",
+      "type" : "int",
+      "quads" : [
+         {
+            "name" : "b",
+            "initializer" : {
+               "value" : 1,
+               "type" : "integer"
+            }
+         }
+      ]
+   },
+   {
+      "definition" : "global",
+      "quads" : [
+         {
+            "initializer" : {
+               "type" : "integer",
+               "value" : 1
+            },
+            "name" : "c"
+         },
+         {
+            "name" : "d",
+            "initializer" : {
+               "type" : "integer",
+               "value" : 2
+            }
+         }
+      ],
+      "type" : "int"
+   },
+   {
+      "type" : "float",
+      "quads" : [
+         {
+            "initializer" : {
+               "value" : 1.2,
+               "type" : "float"
+            },
+            "name" : "f"
+         }
+      ],
+      "definition" : "global"
+   },
+   {
+      "definition" : "global",
+      "quads" : [
+         {
+            "initializer" : {
+               "value" : 10,
+               "type" : "character"
+            },
+            "name" : "newline"
+         }
+      ],
+      "type" : "char"
+   },
+   {
+      "quads" : [
+         {
+            "name" : "hex",
+            "initializer" : {
+               "type" : "integer",
+               "value" : 18
+            }
+         }
+      ],
+      "type" : "int",
+      "definition" : "global"
+   },
+   {
+      "type" : "char",
+      "quads" : [
+         {
+            "initializer" : {
+               "type" : "character",
+               "value" : 97
+            },
+            "name" : "c"
+         }
+      ],
+      "definition" : "global"
+   },
+   {
+      "quads" : [
+         {
+            "name" : "single_quote",
+            "initializer" : {
+               "value" : 39,
+               "type" : "character"
+            }
+         }
+      ],
+      "type" : "char",
+      "definition" : "global"
+   },
+   {
+      "definition" : "global",
+      "type" : "char",
+      "quads" : [
+         {
+            "initializer" : {
+               "value" : 34,
+               "type" : "character"
+            },
+            "name" : "double_quote"
+         }
+      ]
+   },
+   {
+      "definition" : "global",
+      "quads" : [
+         {
+            "initializer" : {
+               "type" : "string",
+               "value" : "hello,world"
+            },
+            "stars" : "*",
+            "name" : "str"
+         }
+      ],
+      "type" : "char"
+   },
+   {
+      "definition" : "global",
+      "quads" : [
+         {
+            "name" : "a",
+            "array_count" : {
+               "value" : 10,
+               "type" : "integer"
+            }
+         }
+      ],
+      "type" : "int"
+   },
+   {
+      "definition" : "global",
+      "quads" : [
+         {
+            "name" : "custom_variable"
+         }
+      ],
+      "type" : "custom_type"
+   },
+   {
+      "definition" : "global",
+      "quads" : [
+         {
+            "initializer" : {
+               "value" : 3.1415926,
+               "type" : "float"
+            },
+            "name" : "pi"
+         }
+      ],
+      "type" : "float",
+      "modifiers" : [
+         "const",
+         "static"
+      ]
+   }
+]

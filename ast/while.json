@@ -1,50 +1,73 @@
-[{
-    "name":"main",
-    "definition":"function",
-    "body":[{
-        "condition":{
-          "type":"integer",
-          "value":1
-        },
-        "statement":"iteration",
-        "iteration":"while",
-        "body":{
-          "statement":"compound",
-          "statements":[{
-              "statement":"expression",
-              "expression":{
-                "arguments":[{
-                    "type":"string",
-                    "value":"hello"
-                  }],
-                "function_name":"printf"
-              }
-            },{
-              "statement":"expression",
-              "expression":{
-                "arguments":[{
-                    "type":"string",
-                    "value":"world\n"
-                  }],
-                "function_name":"printf"
-              }
-            }]
-        }
-      },{
-        "value":{
-          "type":"integer",
-          "value":0
-        },
-        "statement":"jump",
-        "jump":"return"
-      }],
-    "parameters":[{
-        "name":"argc",
-        "type":"int"
-      },{
-        "name":"argv",
-        "type":"char",
-        "stars":"**"
-      }],
-    "return_type":"int"
-  }]
+[
+   {
+      "name" : "main",
+      "body" : [
+         {
+            "iteration" : "while",
+            "body" : {
+               "statements" : [
+                  {
+                     "statement" : "expression",
+                     "expression" : {
+                        "arguments" : [
+                           {
+                              "type" : "string",
+                              "value" : "hello"
+                           }
+                        ],
+                        "function" : {
+                           "type" : "variable",
+                           "value" : "printf"
+                        },
+                        "type" : "call"
+                     }
+                  },
+                  {
+                     "expression" : {
+                        "arguments" : [
+                           {
+                              "value" : "world\n",
+                              "type" : "string"
+                           }
+                        ],
+                        "function" : {
+                           "value" : "printf",
+                           "type" : "variable"
+                        },
+                        "type" : "call"
+                     },
+                     "statement" : "expression"
+                  }
+               ],
+               "statement" : "compound"
+            },
+            "statement" : "iteration",
+            "condition" : {
+               "type" : "integer",
+               "value" : 1
+            }
+         },
+         {
+            "statement" : "jump",
+            "jump" : "return",
+            "value" : {
+               "type" : "integer",
+               "value" : 0
+            }
+         }
+      ],
+      "parameters" : [
+         {
+            "type" : "int",
+            "name" : "argc"
+         },
+         {
+            "type" : "char",
+            "stars" : "**",
+            "name" : "argv"
+         }
+      ],
+      "definition" : "function",
+      "return_type" : "int"
+   }
+]
