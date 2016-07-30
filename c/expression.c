@@ -11,4 +11,12 @@ int main(int argc, char **argv)
 	a.b->c[0](); 
 	i++;
 	j--;
+
+	// p2 expression
+	++x;
+	--x;
+	-x;
+	*ptr;
+	&var;
+	(int)x;
 }

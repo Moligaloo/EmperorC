@@ -113,7 +113,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
 
-	expression <- p1_expression
+	expression <- p2_expression
 	p0_expression <- 
 		literal_value 
 		/ variable 
@@ -125,8 +125,19 @@ local grammar = re.compile([[
 		/ {| {:postfix: '' -> 'dot' :} S '.' S {:member:IDENTIFIER:} |}
 		/ {| {:postfix: '' -> 'arrow':} S '->' S {:member:IDENTIFIER:} |}
 		/ {| {:postfix: '' -> 'call':} PAREN_L {:arguments:arguments:}? PAREN_R |} 
-		/ {| {:postfix: '++' -> 'increment' :} |}
-		/ {| {:postfix: '--' -> 'decrement' :} |}
+		/ {| {:postfix: '++' -> 'post_increment' :} |}
+		/ {| {:postfix: '--' -> 'post_decrement' :} |}
+	p2_expression <-
+		p1_expression
+		/ {| {:prefixes: {| p2_prefix+ |} :} {:p2: p2_expression :} |} -> p2_tree
+	p2_prefix <-
+		{| S {:prefix: '++' -> 'pre_increment' :} S |}
+		/ {| S {:prefix: '--' -> 'pre_decrement' :} S |}
+		/ {| S {:prefix: '-' -> 'negate' :} S |}
+		/ {| PAREN_L {:prefix: '' -> 'cast' :} {:cast:VAR_TYPE:} PAREN_R |}  
+		/ {| S {:prefix: '*' -> 'deref' :} S |}
+		/ {| S {:prefix: '&' -> 'addr' :} S |}
+		/ {| S {:prefix: 'sizeof':} S |}
 
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
@@ -171,7 +182,8 @@ local grammar = re.compile([[
 	ITERATION <- 'while' / 'do' / 'for'
 	STORAGE <- 'auto' / 'register' / 'static' / 'const'
 	LABEL <- 'case' / 'default'
-	KEYWORD <- VOID / PRIMITIVE / JUMP / SELECTION / ITERATION / LABEL / STORAGE
+	OPERATOR <- 'sizeof'
+	KEYWORD <- VOID / PRIMITIVE / JUMP / SELECTION / ITERATION / LABEL / STORAGE / OPERATOR
 	IDENTIFIER <- (! (KEYWORD [^_%w%d] ) ) [_%w][_%w%d]*
 
 	VAR_TYPE <- PRIMITIVE / IDENTIFIER
@@ -235,7 +247,7 @@ local grammar = re.compile([[
 						['function'] = tree,
 						arguments = postfix.arguments
 					}
-				elseif type == 'dot' or type == 'arrow' or type == 'increment' or type == 'decrement' then
+				elseif type == 'dot' or type == 'arrow' or type == 'post_increment' or type == 'post_decrement' then
 					tree = {
 						type = type,
 						ref = tree,
@@ -251,6 +263,24 @@ local grammar = re.compile([[
 			end
 		end
 
+		return tree
+	end,
+	p2_tree = function(p2)
+		local tree = p2.p2
+		for _, prefix in ipairs(p2.prefixes) do
+			if prefix.prefix == 'cast' then
+				tree = {
+					type = 'cast',
+					expression = tree,
+					cast = prefix.cast
+				}
+			else
+				tree = {
+					type = prefix.prefix,
+					expression = tree
+				}
+			end
+		end
 		return tree
 	end,
 })
