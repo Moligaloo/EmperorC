@@ -111,10 +111,14 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
 	expression <- 
-	call_expression / prefix_expression / binary_expression / term
+		prefix_expression / binary_expression / term
 	prefix_expression <- {| {:op: PREFIX_OP :} S {:A: term :} |}
 	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: term :} |}
-	call_expression <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
+	term <- literal_value / function_call / variable
+	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
+	variable <- {| {:name: IDENTIFIER :} |} -> variable
+	arguments <- {| argument (S ',' S argument)* |} / ''
+	argument <- expression
 
 	-- statements
 	statement <- compound_statement / jump_statement / expression_statement / vardef_statement / iteration_statement
@@ -133,10 +137,6 @@ local grammar = re.compile([[
 	jump_return <- {:jump: 'return' :} S {:value: expression :}?
 
 	vardef_statement <- {| {:statement: '' -> 'vardef' :} <vardef> |} 
-	term <- literal_value / variable
-	variable <- {| {:name: IDENTIFIER :} |} -> variable
-	arguments <- {| argument (S ',' S argument)* |} / ''
-	argument <- expression
 	parameter <- {| {:type: VAR_TYPE :} S {:quad:vardef_quad:} |} -> parameter
 	parameters <- {| parameter (S ',' S parameter)* |} / '' 
 
