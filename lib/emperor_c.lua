@@ -183,9 +183,7 @@ local grammar = re.compile([[
 		{| {:type:''->'ternary':} {:condition:p12_expression:} S '?' S {:yes:p12_expression:} S ':' S {:no:p12_expression:} |}
 		/ p12_expression
 
-	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
-
 	arguments <- {| argument (S ',' S argument)* |}
 	argument <- expression
 
