@@ -110,11 +110,14 @@ local grammar = re.compile([[
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
 	function_body <- (S compound_statement S) -> flat_compound
-	expression <- 
-		prefix_expression / binary_expression / term
-	prefix_expression <- {| {:op: PREFIX_OP :} S {:A: term :} |}
-	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: term :} |}
-	term <- literal_value / function_call / variable
+	expression <- binary_expression / term
+	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: expression :} |}
+	term <- 
+		literal_value 
+		/ function_call 
+		/ variable
+		/ prefix_term
+	prefix_term <- {| {:op: PREFIX_OP :} S {:A: term :} |}
 	function_call <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	arguments <- {| argument (S ',' S argument)* |} / ''
