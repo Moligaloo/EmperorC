@@ -109,16 +109,20 @@ local grammar = re.compile([[
 
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
-	function_body <- {| S compound_statement S |}
+	function_body <- (S compound_statement S) -> flat_compound
 	expression <- call_expression / unary_expression / binary_expression / term
 	unary_expression <- {| {:op: UNUARY_OP :} S {:A: term :} |}
 	binary_expression <- {| {:A: term :} S {:op: BINARY_OP :} S {:B: term :} |}
 	call_expression <- {| {:function_name:IDENTIFIER:} S {:arguments: '(' S {: arguments :} S ')' :} |}
 
 	-- statements
-	statement <- compound_statement / jump_statement / expression_statement / vardef_statement
-	compound_statement <- '{' S statement* S '}'
+	statement <- compound_statement / jump_statement / expression_statement / vardef_statement / iteration_statement
+	compound_statement <- {| {:statement: '' -> 'compound' :} BRACE_L {:statements:statements:} BRACE_R |}
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
+	iteration_statement <- {| {:statement: '' -> 'iteration' :} <iteration_while> |}
+	statements <- {| statement* |}
+
+	iteration_while <- {:iteration: 'while' :} PAREN_L {:condition:expression:} PAREN_R {:body:statement:}
 	
 	jump_statement <- {| {:statement: '' -> 'jump' :} <jump_action> ENDING_SEMICOLON |}
 	jump_action <- jump_goto / jump_continue / jump_break / jump_return
@@ -153,7 +157,7 @@ local grammar = re.compile([[
 	STORAGE <- 'auto' / 'register' / 'static' / 'const'
 	LABEL <- 'case' / 'default'
 	KEYWORD <- VOID / PRIMITIVE / JUMP / SELECTION / ITERATION / LABEL / STORAGE
-	IDENTIFIER <- (! (KEYWORD %s) ) [_%w][_%w%d]*
+	IDENTIFIER <- (! (KEYWORD [^_%w%d] ) ) [_%w][_%w%d]*
 
 	VAR_TYPE <- PRIMITIVE / IDENTIFIER
 	RETURN_TYPE <- VOID / VAR_TYPE
@@ -167,6 +171,10 @@ local grammar = re.compile([[
 	MULTILINE_COMMENT <- '/*' ([^*] / ('*' !'/' ))* '*/'
 	COMMENT <- SINGLE_LINE_COMMENT / MULTILINE_COMMENT
 	S <- (%s / COMMENT)*
+	PAREN_L <- S '(' S
+	PAREN_R <- S ')' S
+	BRACE_L <- S '{' S
+	BRACE_R <- S '}' S
 ]], {
 	hexadecimal_integer = function(str)
 		return create_value('integer', tonumber(str:sub(3), 16))
@@ -195,6 +203,9 @@ local grammar = re.compile([[
 		t.quad.type = t.type
 		return t.quad
 	end,
+	flat_compound = function(compound_statement)
+		return compound_statement.statements
+	end
 })
 
 local session = {}
