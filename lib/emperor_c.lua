@@ -111,7 +111,7 @@ local grammar = re.compile([[
 
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
-	function_body <- compound_statement -> flat_compound
+	function_body <- compound_statement -> statements_from_compound
 
 	expression <- p14_expression
 	p0_expression <- 
@@ -281,7 +281,7 @@ local grammar = re.compile([[
 		t.quad.type = t.type
 		return t.quad
 	end,
-	flat_compound = function(compound_statement)
+	statements_from_compound = function(compound_statement)
 		return compound_statement.statements
 	end,
 	p1_tree = function(p1)
