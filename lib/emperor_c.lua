@@ -202,7 +202,7 @@ local grammar = re.compile([[
 		/ selection_statement
 	compound_statement <- {| {:statement: '' -> 'compound' :} BRACE_L {:statements:statements:} BRACE_R |} 
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
-	iteration_statement <- {| {:statement: '' -> 'iteration' :} <iteration> |}
+	iteration_statement <- {| iteration_while / iteration_for |}
 	statements <- {| statement* |}
 	selection_statement <- selection_if
 	selection_if <- 
@@ -210,10 +210,9 @@ local grammar = re.compile([[
 	selection_else <-
 		'else' S {: statement :}
 
-	iteration <- iteration_while / iteration_for
-	iteration_while <- {:iteration: 'while' :} PAREN_L {:condition:expression:} PAREN_R {:body:statement:}
+	iteration_while <- {:statement: 'while' :} PAREN_L {:condition:expression:} PAREN_R {:body:statement:} 
 	iteration_for <- 
-		{:iteration: 'for' :} PAREN_L {:init:statement:} {:condition:expression:} S ';' S {:next:expression:} PAREN_R {:body:statement:}
+		{:statement: 'for' :} PAREN_L {:init:statement:} {:condition:expression:} S ';' S {:next:expression:} PAREN_R {:body:statement:}
 	
 	jump_statement <- {| {:statement: '' -> 'jump' :} <jump_action> ENDING_SEMICOLON |}
 	jump_action <- jump_goto / jump_continue / jump_break / jump_return
