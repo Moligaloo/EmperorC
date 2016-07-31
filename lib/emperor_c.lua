@@ -184,8 +184,9 @@ local grammar = re.compile([[
 		/ p12_expression
 
 	p14_expression <-
-		{| {:left:p13_expression:} S {:type:'='->'assign':} S {:right:p14_expression:} |}
+		{| {:left:p13_expression:} S {:extra:EXTRA_ASSIGN:}? {:type:'='->'assign':} S {:right:p14_expression:} |}
 		/ p13_expression
+
 
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	arguments <- {| argument (S ',' S argument)* |}
@@ -247,6 +248,8 @@ local grammar = re.compile([[
 	BRACE_R <- S '}' S
 	BRACKET_L <- S '[' S
 	BRACKET_R <- S ']' S
+	EXTRA_ASSIGN <-
+		[-+*/%&^|] / '<<' / '>>'
 ]], {
 	hexadecimal_integer = function(str)
 		return create_value('integer', tonumber(str:sub(3), 16))
