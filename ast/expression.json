@@ -6,11 +6,14 @@
                 "type": "int"
             },
             {
+                "stars": "**",
                 "type": "char",
-                "name": "argv",
-                "stars": "**"
+                "name": "argv"
             }
         ],
+        "definition": "function",
+        "return_type": "int",
+        "name": "main",
         "body": [
             {
                 "expression": {
@@ -35,26 +38,26 @@
             },
             {
                 "expression": {
+                    "type": "call",
                     "function": {
+                        "subscript": {
+                            "value": 0,
+                            "type": "integer"
+                        },
                         "type": "subscript",
                         "ref": {
-                            "member": "c",
                             "type": "arrow",
+                            "member": "c",
                             "ref": {
-                                "member": "b",
                                 "type": "dot",
+                                "member": "b",
                                 "ref": {
                                     "value": "a",
                                     "type": "variable"
                                 }
                             }
-                        },
-                        "subscript": {
-                            "value": 0,
-                            "type": "integer"
                         }
-                    },
-                    "type": "call"
+                    }
                 },
                 "statement": "expression"
             },
@@ -127,12 +130,12 @@
             },
             {
                 "expression": {
+                    "cast": "int",
                     "type": "cast",
                     "expression": {
                         "value": "x",
                         "type": "variable"
-                    },
-                    "cast": "int"
+                    }
                 },
                 "statement": "expression"
             },
@@ -175,13 +178,11 @@
             },
             {
                 "expression": {
-                    "type": "modular",
                     "right": {
                         "value": "c",
                         "type": "variable"
                     },
                     "left": {
-                        "type": "multiply",
                         "right": {
                             "value": "b",
                             "type": "variable"
@@ -189,20 +190,20 @@
                         "left": {
                             "value": "a",
                             "type": "variable"
-                        }
-                    }
+                        },
+                        "type": "multiply"
+                    },
+                    "type": "modular"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "multiply",
                     "right": {
                         "value": "z",
                         "type": "variable"
                     },
                     "left": {
-                        "type": "modular",
                         "right": {
                             "value": "y",
                             "type": "variable"
@@ -210,14 +211,15 @@
                         "left": {
                             "value": "x",
                             "type": "variable"
-                        }
-                    }
+                        },
+                        "type": "modular"
+                    },
+                    "type": "multiply"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "modular",
                     "right": {
                         "value": "b",
                         "type": "variable"
@@ -225,21 +227,19 @@
                     "left": {
                         "value": "a",
                         "type": "variable"
-                    }
+                    },
+                    "type": "modular"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "subtract",
                     "right": {
                         "value": "d",
                         "type": "variable"
                     },
                     "left": {
-                        "type": "add",
                         "right": {
-                            "type": "multiply",
                             "right": {
                                 "value": "c",
                                 "type": "variable"
@@ -247,19 +247,21 @@
                             "left": {
                                 "value": "b",
                                 "type": "variable"
-                            }
+                            },
+                            "type": "multiply"
                         },
                         "left": {
                             "value": "a",
                             "type": "variable"
-                        }
-                    }
+                        },
+                        "type": "add"
+                    },
+                    "type": "subtract"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "left_shift",
                     "right": {
                         "value": 2,
                         "type": "integer"
@@ -267,19 +269,18 @@
                     "left": {
                         "value": "a",
                         "type": "variable"
-                    }
+                    },
+                    "type": "left_shift"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "right_shift",
                     "right": {
                         "value": 3,
                         "type": "integer"
                     },
                     "left": {
-                        "type": "add",
                         "right": {
                             "value": 1,
                             "type": "integer"
@@ -287,16 +288,16 @@
                         "left": {
                             "value": "a",
                             "type": "variable"
-                        }
-                    }
+                        },
+                        "type": "add"
+                    },
+                    "type": "right_shift"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "less",
                     "right": {
-                        "type": "add",
                         "right": {
                             "value": "b",
                             "type": "variable"
@@ -304,18 +305,19 @@
                         "left": {
                             "value": "a",
                             "type": "variable"
-                        }
+                        },
+                        "type": "add"
                     },
                     "left": {
                         "value": "i",
                         "type": "variable"
-                    }
+                    },
+                    "type": "less"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "greater_equal",
                     "right": {
                         "value": "a",
                         "type": "variable"
@@ -323,13 +325,13 @@
                     "left": {
                         "value": "j",
                         "type": "variable"
-                    }
+                    },
+                    "type": "greater_equal"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "equal",
                     "right": {
                         "value": "b",
                         "type": "variable"
@@ -337,13 +339,13 @@
                     "left": {
                         "value": "a",
                         "type": "variable"
-                    }
+                    },
+                    "type": "equal"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "not_equal",
                     "right": {
                         "value": "d",
                         "type": "variable"
@@ -351,19 +353,18 @@
                     "left": {
                         "value": "c",
                         "type": "variable"
-                    }
+                    },
+                    "type": "not_equal"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "bitwise_and",
                     "right": {
                         "value": "c",
                         "type": "variable"
                     },
                     "left": {
-                        "type": "bitwise_and",
                         "right": {
                             "value": "b",
                             "type": "variable"
@@ -371,14 +372,15 @@
                         "left": {
                             "value": "a",
                             "type": "variable"
-                        }
-                    }
+                        },
+                        "type": "bitwise_and"
+                    },
+                    "type": "bitwise_and"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "bitwise_xor",
                     "right": {
                         "value": "b",
                         "type": "variable"
@@ -386,13 +388,13 @@
                     "left": {
                         "value": "a",
                         "type": "variable"
-                    }
+                    },
+                    "type": "bitwise_xor"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "bitwise_or",
                     "right": {
                         "value": "b",
                         "type": "variable"
@@ -400,13 +402,13 @@
                     "left": {
                         "value": "a",
                         "type": "variable"
-                    }
+                    },
+                    "type": "bitwise_or"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "logic_and",
                     "right": {
                         "value": "b",
                         "type": "variable"
@@ -414,13 +416,13 @@
                     "left": {
                         "value": "a",
                         "type": "variable"
-                    }
+                    },
+                    "type": "logic_and"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
-                    "type": "logic_or",
                     "right": {
                         "value": "b",
                         "type": "variable"
@@ -428,31 +430,50 @@
                     "left": {
                         "value": "a",
                         "type": "variable"
-                    }
+                    },
+                    "type": "logic_or"
                 },
                 "statement": "expression"
             },
             {
                 "expression": {
+                    "yes": {
+                        "value": "b",
+                        "type": "variable"
+                    },
+                    "type": "ternary",
                     "no": {
                         "value": "c",
                         "type": "variable"
                     },
-                    "type": "ternary",
                     "condition": {
                         "value": "a",
-                        "type": "variable"
-                    },
-                    "yes": {
-                        "value": "b",
                         "type": "variable"
                     }
                 },
                 "statement": "expression"
+            },
+            {
+                "expression": {
+                    "right": {
+                        "right": {
+                            "value": "c",
+                            "type": "variable"
+                        },
+                        "left": {
+                            "value": "b",
+                            "type": "variable"
+                        },
+                        "type": "add"
+                    },
+                    "left": {
+                        "value": "a",
+                        "type": "variable"
+                    },
+                    "type": "assign"
+                },
+                "statement": "expression"
             }
-        ],
-        "definition": "function",
-        "name": "main",
-        "return_type": "int"
+        ]
     }
 ]
