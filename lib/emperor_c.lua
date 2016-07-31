@@ -111,7 +111,7 @@ local grammar = re.compile([[
 
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
-	function_body <- (S compound_statement S) -> flat_compound
+	function_body <- compound_statement -> flat_compound
 
 	expression <- p14_expression
 	p0_expression <- 
@@ -194,12 +194,15 @@ local grammar = re.compile([[
 
 	-- statements
 	statement <- compound_statement / jump_statement / vardef_statement / expression_statement / iteration_statement
-	compound_statement <- {| {:statement: '' -> 'compound' :} BRACE_L {:statements:statements:} BRACE_R |}
+	compound_statement <- {| {:statement: '' -> 'compound' :} BRACE_L {:statements:statements:} BRACE_R |} 
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
-	iteration_statement <- {| {:statement: '' -> 'iteration' :} <iteration_while> |}
+	iteration_statement <- {| {:statement: '' -> 'iteration' :} <iteration> |}
 	statements <- {| statement* |}
 
+	iteration <- iteration_while / iteration_for
 	iteration_while <- {:iteration: 'while' :} PAREN_L {:condition:expression:} PAREN_R {:body:statement:}
+	iteration_for <- 
+		{:iteration: 'for' :} PAREN_L {:init:statement:} {:condition:expression:} S ';' S {:next:expression:} PAREN_R {:body:statement:}
 	
 	jump_statement <- {| {:statement: '' -> 'jump' :} <jump_action> ENDING_SEMICOLON |}
 	jump_action <- jump_goto / jump_continue / jump_break / jump_return

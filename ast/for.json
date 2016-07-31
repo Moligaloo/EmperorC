@@ -1,0 +1,88 @@
+[
+    {
+        "return_type": "int",
+        "definition": "function",
+        "name": "main",
+        "body": [
+            {
+                "iteration": "for",
+                "next": {
+                    "type": "post_increment",
+                    "ref": {
+                        "value": "i",
+                        "type": "variable"
+                    }
+                },
+                "body": {
+                    "statements": [
+                        {
+                            "expression": {
+                                "function": {
+                                    "value": "printf",
+                                    "type": "variable"
+                                },
+                                "type": "call",
+                                "arguments": [
+                                    {
+                                        "value": "%d",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "value": "i",
+                                        "type": "variable"
+                                    }
+                                ]
+                            },
+                            "statement": "expression"
+                        }
+                    ],
+                    "statement": "compound"
+                },
+                "statement": "iteration",
+                "init": {
+                    "statement": "vardef",
+                    "quads": [
+                        {
+                            "initializer": {
+                                "value": 0,
+                                "type": "integer"
+                            },
+                            "name": "i"
+                        }
+                    ],
+                    "type": "int"
+                },
+                "condition": {
+                    "right": {
+                        "value": 10,
+                        "type": "integer"
+                    },
+                    "type": "less",
+                    "left": {
+                        "value": "i",
+                        "type": "variable"
+                    }
+                }
+            },
+            {
+                "statement": "jump",
+                "jump": "return",
+                "value": {
+                    "value": 0,
+                    "type": "integer"
+                }
+            }
+        ],
+        "parameters": [
+            {
+                "type": "int",
+                "name": "argc"
+            },
+            {
+                "name": "argv",
+                "type": "char",
+                "stars": "**"
+            }
+        ]
+    }
+]
