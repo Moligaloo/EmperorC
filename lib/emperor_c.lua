@@ -236,9 +236,6 @@ local grammar = re.compile([[
 	RETURN_TYPE <- VOID / VAR_TYPE
 
 	ENDING_SEMICOLON <- S ';' S
-	PREFIX_OP <- [&-]
-	BINARY_OP <- [<>*/+-] / '==' / '=' / '!=' / '>=' / '<='
-
 	HEXCHAR <- [0-9a-fA-F]
 	SINGLE_LINE_COMMENT <- ('//' / '#') [^%nl]* %nl
 	MULTILINE_COMMENT <- '/*' ([^*] / ('*' !'/' ))* '*/'
