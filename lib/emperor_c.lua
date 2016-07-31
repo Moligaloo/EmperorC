@@ -214,12 +214,11 @@ local grammar = re.compile([[
 	iteration_for <- 
 		{:statement: 'for' :} PAREN_L {:init:statement:} {:condition:expression:} S ';' S {:next:expression:} PAREN_R {:body:statement:}
 	
-	jump_statement <- {| {:statement: '' -> 'jump' :} <jump_action> ENDING_SEMICOLON |}
-	jump_action <- jump_goto / jump_continue / jump_break / jump_return
-	jump_goto <- {:jump: 'goto' :} S {:label: IDENTIFIER :}
-	jump_continue <- {:jump: 'continue' :}
-	jump_break <- {:jump: 'break' :}
-	jump_return <- {:jump: 'return' :} S {:value: expression :}?
+	jump_statement <- {| (jump_goto / jump_continue / jump_break / jump_return) ENDING_SEMICOLON |}
+	jump_goto <- {:statement: 'goto' :} S {:label: IDENTIFIER :}
+	jump_continue <- {:statement: 'continue' :}
+	jump_break <- {:statement: 'break' :}
+	jump_return <- {:statement: 'return' :} S {:value: expression :}?
 
 	vardef_statement <- {| {:statement: '' -> 'vardef' :} <vardef> |} 
 	parameter <- {| {:type: VAR_TYPE :} S {:quad:vardef_quad:} |} -> parameter

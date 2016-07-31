@@ -1,44 +1,43 @@
 [
-   {
-      "name" : "main",
-      "return_type" : "int",
-      "parameters" : [
-         {
-            "name" : "argc",
-            "type" : "int"
-         },
-         {
-            "name" : "argv",
-            "type" : "char",
-            "stars" : "**"
-         }
-      ],
-      "body" : [
-         {
-            "expression" : {
-               "type" : "call",
-               "function" : {
-                  "value" : "printf",
-                  "type" : "variable"
-               },
-               "arguments" : [
-                  {
-                     "value" : "hello,world\n",
-                     "type" : "string"
-                  }
-               ]
+    {
+        "definition": "function",
+        "return_type": "int",
+        "name": "main",
+        "body": [
+            {
+                "expression": {
+                    "function": {
+                        "type": "variable",
+                        "value": "printf"
+                    },
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "hello,world\n"
+                        }
+                    ],
+                    "type": "call"
+                },
+                "statement": "expression"
             },
-            "statement" : "expression"
-         },
-         {
-            "value" : {
-               "value" : 0,
-               "type" : "integer"
+            {
+                "value": {
+                    "type": "integer",
+                    "value": 0
+                },
+                "statement": "return"
+            }
+        ],
+        "parameters": [
+            {
+                "type": "int",
+                "name": "argc"
             },
-            "jump" : "return",
-            "statement" : "jump"
-         }
-      ],
-      "definition" : "function"
-   }
+            {
+                "name": "argv",
+                "stars": "**",
+                "type": "char"
+            }
+        ]
+    }
 ]

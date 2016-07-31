@@ -1,89 +1,88 @@
 [
     {
-        "definition": "function",
-        "return_type": "int",
         "name": "main",
+        "definition": "function",
+        "parameters": [
+            {
+                "type": "int",
+                "name": "argc"
+            },
+            {
+                "stars": "**",
+                "type": "char",
+                "name": "argv"
+            }
+        ],
+        "return_type": "int",
         "body": [
             {
                 "statement": "vardef",
+                "type": "int",
                 "quads": [
                     {
-                        "name": "i",
                         "initializer": {
-                            "value": 0,
-                            "type": "integer"
-                        }
+                            "type": "integer",
+                            "value": 0
+                        },
+                        "name": "i"
                     }
-                ],
-                "type": "int"
+                ]
             },
             {
                 "statement": "while",
+                "condition": {
+                    "left": {
+                        "type": "variable",
+                        "value": "i"
+                    },
+                    "type": "less",
+                    "right": {
+                        "type": "integer",
+                        "value": 10
+                    }
+                },
                 "body": {
                     "statement": "compound",
                     "statements": [
                         {
                             "statement": "expression",
                             "expression": {
+                                "function": {
+                                    "type": "variable",
+                                    "value": "printf"
+                                },
+                                "type": "call",
                                 "arguments": [
                                     {
-                                        "value": "%d",
-                                        "type": "string"
+                                        "type": "string",
+                                        "value": "%d"
                                     },
                                     {
-                                        "value": "i",
-                                        "type": "variable"
+                                        "type": "variable",
+                                        "value": "i"
                                     }
-                                ],
-                                "function": {
-                                    "value": "printf",
-                                    "type": "variable"
-                                },
-                                "type": "call"
+                                ]
                             }
                         },
                         {
                             "statement": "expression",
                             "expression": {
                                 "ref": {
-                                    "value": "i",
-                                    "type": "variable"
+                                    "type": "variable",
+                                    "value": "i"
                                 },
                                 "type": "post_increment"
                             }
                         }
                     ]
-                },
-                "condition": {
-                    "right": {
-                        "value": 10,
-                        "type": "integer"
-                    },
-                    "type": "less",
-                    "left": {
-                        "value": "i",
-                        "type": "variable"
-                    }
                 }
             },
             {
-                "statement": "jump",
+                "statement": "return",
                 "value": {
-                    "value": 0,
-                    "type": "integer"
-                },
-                "jump": "return"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "argc",
-                "type": "int"
-            },
-            {
-                "name": "argv",
-                "stars": "**",
-                "type": "char"
+                    "type": "integer",
+                    "value": 0
+                }
             }
         ]
     }
