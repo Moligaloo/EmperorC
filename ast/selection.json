@@ -1,0 +1,101 @@
+[
+    {
+        "return_type": "int",
+        "parameters": "",
+        "name": "main",
+        "body": [
+            {
+                "condition": {
+                    "type": "greater",
+                    "right": {
+                        "type": "integer",
+                        "value": 0
+                    },
+                    "left": {
+                        "type": "variable",
+                        "value": "a"
+                    }
+                },
+                "else": {
+                    "condition": {
+                        "type": "less",
+                        "right": {
+                            "type": "integer",
+                            "value": 0
+                        },
+                        "left": {
+                            "type": "variable",
+                            "value": "a"
+                        }
+                    },
+                    "else": {
+                        "statements": [
+                            {
+                                "expression": {
+                                    "type": "call",
+                                    "arguments": [
+                                        {
+                                            "type": "string",
+                                            "value": "a is zero"
+                                        }
+                                    ],
+                                    "function": {
+                                        "type": "variable",
+                                        "value": "printf"
+                                    }
+                                },
+                                "statement": "expression"
+                            }
+                        ],
+                        "statement": "compound"
+                    },
+                    "body": {
+                        "statements": [
+                            {
+                                "expression": {
+                                    "type": "call",
+                                    "arguments": [
+                                        {
+                                            "type": "string",
+                                            "value": "a is negative"
+                                        }
+                                    ],
+                                    "function": {
+                                        "type": "variable",
+                                        "value": "printf"
+                                    }
+                                },
+                                "statement": "expression"
+                            }
+                        ],
+                        "statement": "compound"
+                    },
+                    "statement": "if"
+                },
+                "body": {
+                    "statements": [
+                        {
+                            "expression": {
+                                "type": "call",
+                                "arguments": [
+                                    {
+                                        "type": "string",
+                                        "value": "a is positive"
+                                    }
+                                ],
+                                "function": {
+                                    "type": "variable",
+                                    "value": "printf"
+                                }
+                            },
+                            "statement": "expression"
+                        }
+                    ],
+                    "statement": "compound"
+                },
+                "statement": "if"
+            }
+        ],
+        "definition": "function"
+    }
+]
