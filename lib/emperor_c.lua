@@ -110,7 +110,7 @@ local grammar = re.compile([[
 	char_in_string <- ('\' {[abfnrtv"]} ) -> escaped_char_map / [^"] -> string_byte
 
 	function_definition <- {| {:definition:'' -> 'function' :} <function_head> {:body:function_body:} |}
-	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:} S ')'
+	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:}? S ')'
 	function_body <- compound_statement -> statements_from_compound
 
 	expression <- p14_expression
@@ -224,7 +224,7 @@ local grammar = re.compile([[
 
 	vardef_statement <- {| {:statement: '' -> 'vardef' :} <vardef> |} 
 	parameter <- {| {:type: VAR_TYPE :} S {:quad:vardef_quad:} |} -> parameter
-	parameters <- {| parameter (S ',' S parameter)* |} / '' 
+	parameters <- {| parameter (S ',' S parameter)* |}
 
 	vardef_stars <- {:stars: [*]+ :}
 	vardef_name <- {:name: IDENTIFIER :}
