@@ -30,13 +30,7 @@ local function map(list, func)
 end
 
 local function fill_template(template, t, sep)
-	local result = template:gsub("%${([^}]+)}", function(name)
-			local prefix_start, prefix_end, prefix = name:find('^([^:]+):')
-			local suffix_start, suffix_end, suffix = name:find(':([^:]+)$')
-			local key_start = prefix_end and (prefix_end+1) or 1
-			local key_end = suffix_start and (suffix_start-1) or -1
-			local key = name:sub(key_start, key_end)
-
+	local result = template:gsub("%${([^%w_]*)([%w_]+)([^%w_]*)}", function(prefix, key, suffix)
 			local result = t[key]
 			if result == nil then
 				return ''
@@ -48,7 +42,7 @@ local function fill_template(template, t, sep)
 				end
 			end
 
-			return ("%s%s%s"):format(prefix or '', result, suffix or '')
+			return ("%s%s%s"):format(prefix, result, suffix)
 		end)
 
 	return result
@@ -125,7 +119,7 @@ local metatables = {
 	global = {
 		__index = {
 			tostring = function(self)
-				return fill_template('${modifiers} ${type} ${quads};', self, {modifiers = ' ', quads = ', '})
+				return fill_template('${modifiers }${type} ${quads};', self, {modifiers = ' ', quads = ', '})
 			end,
 		}
 	},
@@ -139,7 +133,7 @@ local metatables = {
 	vardef_quad = {
 		__index = {
 			tostring = function(self)
-				return fill_template("${stars}${name}${[:array_count:]}${= :initializer}", self)
+				return fill_template("${stars}${name}${[array_count]}${ = initializer}", self)
 			end
 		}
 	}
