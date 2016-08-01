@@ -18,6 +18,42 @@ for key, value in pairs(escaped_char_map) do
 	reverse_escaped_char_map[value] = key
 end
 
+local function map(list, func)
+	local mapped = {}
+	for _, elem in ipairs(list) do
+		local result = func(elem)
+		if result then
+			table.insert(mapped, result)
+		end
+	end
+	return mapped
+end
+
+local function fill_template(template, t, sep)
+	local result = template:gsub("%${([^}]+)}", function(name)
+			local prefix_start, prefix_end, prefix = name:find('^([^:]+):')
+			local suffix_start, suffix_end, suffix = name:find(':([^:]+)$')
+			local key_start = prefix_end and (prefix_end+1) or 1
+			local key_end = suffix_start and (suffix_start-1) or -1
+			local key = name:sub(key_start, key_end)
+
+			local result = t[key]
+			if result == nil then
+				return ''
+			elseif type(result) == 'table' then
+				if getmetatable(result) == nil then 
+					result = table.concat(map(result, function(e) return type(e) == 'string' and e or e:tostring() end), sep[key])
+				else
+					result = result:tostring()
+				end
+			end
+
+			return ("%s%s%s"):format(prefix or '', result, suffix or '')
+		end)
+
+	return result
+end
+
 local function readable_char(char, type)
 	local str = string.char(char)
 
@@ -89,7 +125,7 @@ local metatables = {
 	global = {
 		__index = {
 			tostring = function(self)
-				return 'global'
+				return fill_template('${modifiers} ${type} ${quads};', self, {modifiers = ' ', quads = ', '})
 			end,
 		}
 	},
@@ -98,6 +134,13 @@ local metatables = {
 			tostring = function(self)
 				return 'function'
 			end,
+		}
+	},
+	vardef_quad = {
+		__index = {
+			tostring = function(self)
+				return fill_template("${stars}${name}${[:array_count:]}${= :initializer}", self)
+			end
 		}
 	}
 }
@@ -242,7 +285,7 @@ local grammar = re.compile([[
 	vardef_name <- {:name: IDENTIFIER :}
 	vardef_bracket <- {:array_count: '[' integer ']' :}
 	vardef_initializer <- '=' S {:initializer: expression :}
-	vardef_quad <- {| <vardef_stars>? S <vardef_name> S <vardef_bracket>? S <vardef_initializer>? |}
+	vardef_quad <- {| <vardef_stars>? S <vardef_name> S <vardef_bracket>? S <vardef_initializer>? |} -> vardef_quad
 	vardef_quads <- {| vardef_quad (S ',' S vardef_quad)* |}
 	vardef_modifier <- S {STORAGE} S
 	vardef_modifiers <- {| vardef_modifier+ |}
@@ -297,6 +340,9 @@ local grammar = re.compile([[
 	end,
 	variable = function(t)
 		return create_value('variable', t.name)
+	end,
+	vardef_quad = function(t)
+		return setmetatable(t, metatables.vardef_quad)
 	end,
 	escaped_char_map = escaped_char_map,
 	string_byte = string.byte,
@@ -395,22 +441,8 @@ function session:show_definitions(format)
 	end
 end
 
-local function map(list, func)
-	local mapped = {}
-	for _, elem in ipairs(list) do
-		local result = func(elem)
-		if result then
-			table.insert(mapped, result)
-		end
-	end
-	return mapped
-end
-
-function session:dump()
-	if self.definitions then
-		local lines = map(self.definitions, function(definition) return definition:tostring() end)
-		return table.concat(lines, "\n")
- 	end
+function session:decompile()
+	return fill_template("${definitions}", self, {definitions = "\n"})
 end
 
 return {
