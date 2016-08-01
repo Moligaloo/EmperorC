@@ -30,7 +30,7 @@ local function map(list, func)
 end
 
 local function fill_template(template, t, sep)
-	local result = template:gsub("%${([^%w_]*)([%w_]+)([^%w_]*)}", function(prefix, key, suffix)
+	local result = template:gsub("%${([^%w_]*)([%w_]+)([^%w_}]*)}", function(prefix, key, suffix)
 			local result = t[key]
 			if result == nil then
 				return ''
