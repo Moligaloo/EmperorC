@@ -85,6 +85,20 @@ local metatables = {
 			end,
 			size = function() return #self.value + 1 end
 		}
+	},
+	global = {
+		__index = {
+			tostring = function(self)
+				return 'global'
+			end,
+		}
+	},
+	['function'] = {
+		__index = {
+			tostring = function(self)
+				return 'function'
+			end,
+		}
 	}
 }
 
@@ -94,7 +108,7 @@ end
 
 local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
-	definition <- function_definition / global_variable_definition
+	definition <- (function_definition / global_variable_definition) -> definition
 	global_variable_definition <- {| {:definition: '' -> 'global' :} <vardef> |} 
 	static_initializer <- '=' S {: literal_value :}
 
@@ -348,6 +362,9 @@ local grammar = re.compile([[
 		end
 		return expression
 	end,
+	definition = function(t)
+		return setmetatable(t, metatables[t.definition])
+	end
 })
 
 local session = {}
@@ -381,28 +398,17 @@ end
 local function map(list, func)
 	local mapped = {}
 	for _, elem in ipairs(list) do
-		table.insert(mapped, func(elem))
+		local result = func(elem)
+		if result then
+			table.insert(mapped, result)
+		end
 	end
 	return mapped
 end
 
 function session:dump()
 	if self.definitions then
-		local lines = map(self.definitions, function(definition) 
-			if definition.definition == 'global' then
-				local initializer = definition.initializer
-				local space = ' '
-				if definition.type:find('[*]$') then
-					space = ''
-				end
-				if initializer then
-					return ("%s%s%s = %s;"):format(definition.type, space, definition.name, initializer:tostring())
-				else
-					return ("%s%s%s;"):format(definition.type, space, definition.name)
-				end
-			end
-		end)
-
+		local lines = map(self.definitions, function(definition) return definition:tostring() end)
 		return table.concat(lines, "\n")
  	end
 end
