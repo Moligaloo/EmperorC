@@ -126,7 +126,7 @@ local metatables = {
 	['function'] = {
 		__index = {
 			tostring = function(self)
-				return 'function'
+				return fill_template('${return_type} ${name}(${parameters})', self, {parameters = ', '})
 			end,
 		}
 	},
@@ -134,6 +134,13 @@ local metatables = {
 		__index = {
 			tostring = function(self)
 				return fill_template("${stars}${name}${[array_count]}${ = initializer}", self)
+			end
+		}
+	},
+	parameter = {
+		__index = {
+			tostring = function(self)
+				return fill_template('${type }${stars}${name}', self)
 			end
 		}
 	}
@@ -272,7 +279,7 @@ local grammar = re.compile([[
 	jump_return <- {:statement: 'return' :} S {:value: expression :}?
 
 	vardef_statement <- {| {:statement: '' -> 'vardef' :} <vardef> |} 
-	parameter <- {| {:type: VAR_TYPE :} S {:quad:vardef_quad:} |} -> parameter
+	parameter <- {| {:type: VAR_TYPE :} S <vardef_stars>? S {:name:IDENTIFIER:} |} -> parameter
 	parameters <- {| parameter (S ',' S parameter)* |}
 
 	vardef_stars <- {:stars: [*]+ :}
@@ -341,8 +348,7 @@ local grammar = re.compile([[
 	escaped_char_map = escaped_char_map,
 	string_byte = string.byte,
 	parameter = function(t)
-		t.quad.type = t.type
-		return t.quad
+		return setmetatable(t, metatables.parameter)
 	end,
 	statements_from_compound = function(compound_statement)
 		return compound_statement.statements
