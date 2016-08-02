@@ -259,7 +259,7 @@ local grammar = re.compile([[
 		/ iteration_statement
 		/ selection_statement
 	compound_statement <- {| {:statement: '' -> 'compound' :} BRACE_L {:statements:statements:} BRACE_R |} 
-	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} ENDING_SEMICOLON |}
+	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} SEMICOLON |}
 	iteration_statement <- {| iteration_while / iteration_for |}
 	statements <- {| statement* |}
 	selection_statement <- selection_if
@@ -272,7 +272,7 @@ local grammar = re.compile([[
 	iteration_for <- 
 		{:statement: 'for' :} PAREN_L {:init:statement:} {:condition:expression:} S ';' S {:next:expression:} PAREN_R {:body:statement:}
 	
-	jump_statement <- {| (jump_goto / jump_continue / jump_break / jump_return) ENDING_SEMICOLON |}
+	jump_statement <- {| (jump_goto / jump_continue / jump_break / jump_return) SEMICOLON |}
 	jump_goto <- {:statement: 'goto' :} S {:label: IDENTIFIER :}
 	jump_continue <- {:statement: 'continue' :}
 	jump_break <- {:statement: 'break' :}
@@ -290,7 +290,7 @@ local grammar = re.compile([[
 	vardef_quads <- {| vardef_quad (S ',' S vardef_quad)* |}
 	vardef_modifier <- S {STORAGE} S
 	vardef_modifiers <- {| vardef_modifier+ |}
-	vardef <-  S {:modifiers:vardef_modifiers:}? S {:type: VAR_TYPE :} S {:quads: vardef_quads :} ENDING_SEMICOLON 
+	vardef <-  S {:modifiers:vardef_modifiers:}? S {:type: VAR_TYPE :} S {:quads: vardef_quads :} SEMICOLON 
 
 	VOID <- 'void'
 	PRIMITIVE <- 'char' / 'short' / 'int' / 'long' / 'float' / 'double'
@@ -306,7 +306,7 @@ local grammar = re.compile([[
 	VAR_TYPE <- PRIMITIVE / IDENTIFIER
 	RETURN_TYPE <- VOID / VAR_TYPE
 
-	ENDING_SEMICOLON <- S ';' S
+	SEMICOLON <- S ';' S
 	HEXCHAR <- [0-9a-fA-F]
 	SINGLE_LINE_COMMENT <- ('//' / '#') [^%nl]* %nl
 	MULTILINE_COMMENT <- '/*' ([^*] / ('*' !'/' ))* '*/'
