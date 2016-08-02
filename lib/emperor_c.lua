@@ -150,6 +150,11 @@ local function create_value(type, value)
 	return setmetatable({type = type, value = value}, metatables[type])
 end
 
+local function create_mt_setter(metatable_name)
+	local mt = metatables[metatable_name]
+	return function(t) return setmetatable(t, mt) end
+end
+
 local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
 	definition <- (function_definition / global_variable_definition) -> definition
@@ -342,14 +347,8 @@ local grammar = re.compile([[
 	variable = function(t)
 		return create_value('variable', t.name)
 	end,
-	vardef_quad = function(t)
-		return setmetatable(t, metatables.vardef_quad)
-	end,
 	escaped_char_map = escaped_char_map,
 	string_byte = string.byte,
-	parameter = function(t)
-		return setmetatable(t, metatables.parameter)
-	end,
 	statements_from_compound = function(compound_statement)
 		return compound_statement.statements
 	end,
@@ -410,7 +409,9 @@ local grammar = re.compile([[
 	end,
 	definition = function(t)
 		return setmetatable(t, metatables[t.definition])
-	end
+	end,
+	vardef_quad = create_mt_setter('vardef_quad'),
+	parameter = create_mt_setter('parameter'),
 })
 
 local session = {}
