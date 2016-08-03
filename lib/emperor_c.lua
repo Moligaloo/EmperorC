@@ -29,14 +29,18 @@ local function map(list, func)
 	return mapped
 end
 
-local function fill_template(template, t, sep)
+local function spaces(count)
+	return string.rep(' ', count * 4)
+end
+
+local function fill_template(template, t, sep, env)
 	local result = template:gsub("%${([^%w_]*)([%w_]+)([^%w_}]*)}", function(prefix, key, suffix)
 			local result = t[key]
 			if result == nil then
 				return ''
 			elseif type(result) == 'table' then
-				if getmetatable(result) == nil then 
-					result = table.concat(map(result, function(e) return type(e) == 'string' and e or e:tostring() end), sep[key])
+				if getmetatable(result) == nil then
+					result = table.concat(map(result, function(e) return type(e) == 'string' and e or e:tostring(env) end), sep[key])
 				else
 					result = result:tostring()
 				end
@@ -44,6 +48,10 @@ local function fill_template(template, t, sep)
 
 			return ("%s%s%s"):format(prefix, result, suffix)
 		end)
+
+	if env then
+		result = result:gsub('%$%$', spaces(env.indent))
+	end
 
 	return result
 end
@@ -67,6 +75,17 @@ local function readable_char(char, type)
 		return ("\\x%02X"):format(char)
 	end
 end
+
+
+local statement_tostring_funcs = {
+	expression = function(self, env)
+		return fill_template('$$expression;\n', self, env)
+	end,
+
+	['return'] = function(self, env)
+		return fill_template('$$return ${value};\n', self, env)
+	end
+}
 
 local metatables = {
 	integer = {
@@ -126,7 +145,7 @@ local metatables = {
 	['function'] = {
 		__index = {
 			tostring = function(self)
-				return fill_template('${return_type} ${name}(${parameters})', self, {parameters = ', '})
+				return fill_template('${return_type} ${name}(${parameters}){\n${body}}', self, {parameters = ', '}, {indent = 1})
 			end,
 		}
 	},
@@ -143,6 +162,13 @@ local metatables = {
 				return fill_template('${type }${stars}${name}', self)
 			end
 		}
+	},
+	statement = {
+		__index = function(self, index)
+			if index == 'tostring' then
+				return statement_tostring_funcs[self.statement]
+			end
+		end
 	}
 }
 
@@ -250,19 +276,18 @@ local grammar = re.compile([[
 		{| {:left:p13_expression:} S {:extra:EXTRA_ASSIGN:}? {:type:'='->'assign':} S {:right:p14_expression:} |}
 		/ p13_expression
 
-
 	variable <- {| {:name: IDENTIFIER :} |} -> variable
 	arguments <- {| argument (S ',' S argument)* |}
 	argument <- expression
 
 	-- statements
 	statement <- 
-		compound_statement 
+		(compound_statement 
 		/ jump_statement 
 		/ vardef_statement 
 		/ expression_statement 
 		/ iteration_statement
-		/ selection_statement
+		/ selection_statement) -> statement
 	compound_statement <- {| {:statement: '' -> 'compound' :} BRACE_L {:statements:statements:} BRACE_R |} 
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} SEMICOLON |}
 	iteration_statement <- {| iteration_while / iteration_for |}
@@ -412,6 +437,7 @@ local grammar = re.compile([[
 	end,
 	vardef_quad = create_mt_setter('vardef_quad'),
 	parameter = create_mt_setter('parameter'),
+	statement = create_mt_setter('statement'),
 })
 
 local session = {}
