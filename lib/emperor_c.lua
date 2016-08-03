@@ -76,10 +76,19 @@ local function readable_char(char, type)
 	end
 end
 
+local expression_tostring_funcs = {
+	call = function(self, env)
+		return fill_template('${function}(${arguments})', self, {arguments = ', '}, env)
+	end
+}
 
 local statement_tostring_funcs = {
 	expression = function(self, env)
-		return fill_template('$$expression;\n', self, env)
+		return fill_template(
+			'$$${expression};\n', 
+			{expression = expression_tostring_funcs[self.expression.type](self.expression, env)}, 
+			env
+		)
 	end,
 
 	['return'] = function(self, env)
@@ -169,6 +178,13 @@ local metatables = {
 				return statement_tostring_funcs[self.statement]
 			end
 		end
+	},
+	variable = {
+		__index = {
+			tostring = function(self)
+				return self.value
+			end
+		}
 	}
 }
 
