@@ -50,7 +50,7 @@ local function fill_template(template, t, sep, env)
 		end)
 
 	if env then
-		result = result:gsub('%$%$', spaces(env.indent))
+		result = result:gsub('%$>', spaces(env.indent))
 	end
 
 	return result
@@ -85,14 +85,14 @@ local expression_tostring_funcs = {
 local statement_tostring_funcs = {
 	expression = function(self, env)
 		return fill_template(
-			'$$${expression};\n', 
+			'$>${expression};\n', 
 			{expression = expression_tostring_funcs[self.expression.type](self.expression, env)}, 
 			env
 		)
 	end,
 
 	['return'] = function(self, env)
-		return fill_template('$$return ${value};\n', self, env)
+		return fill_template('$>return ${value};\n', self, env)
 	end
 }
 
