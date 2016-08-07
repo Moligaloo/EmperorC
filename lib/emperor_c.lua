@@ -1,4 +1,5 @@
 local re = require 're'
+local json = require 'dkjson'
 
 -- copied from https://en.wikipedia.org/wiki/Escape_sequences_in_C
 local escaped_char_map = {
@@ -33,27 +34,47 @@ local function spaces(count)
 	return string.rep(' ', count * 4)
 end
 
-local function fill_template(template, t, sep, env)
+local function object_tostring(object, indent)
+	if type(object) == 'table' then
+		if object.tostring then
+			return object:tostring(indent)
+		else
+			error(("object %s has no tostring method"):format(json.encode(object)))
+		end
+	else
+		return tostring(object)
+	end
+end
+
+local function fill_template(template, t, sep, indent)
 	local result = template:gsub("%${([^%w_]*)([%w_]+)([^%w_}]*)}", function(prefix, key, suffix)
 			local result = t[key]
 			if result == nil then
 				return ''
 			elseif type(result) == 'table' then
 				if getmetatable(result) == nil then
-					result = table.concat(map(result, function(e) return type(e) == 'string' and e or e:tostring(env) end), sep[key])
+					result = table.concat(map(result, function(e) return object_tostring(e, indent) end), sep[key])
 				else
-					result = result:tostring()
+					result = object_tostring(result, indent)
 				end
 			end
 
 			return ("%s%s%s"):format(prefix, result, suffix)
 		end)
 
-	if env then
-		result = result:gsub('%$>', spaces(env.indent))
+	if indent then
+		result = result:gsub('%$>', spaces(indent))
 	end
 
 	return result
+end
+
+local template_func = function(template, sep)
+	return function(self, indent) return fill_template(template, self, sep, indent) end
+end
+
+local tostring_metatable = function(tostring_func)
+	return { __index = { tostring = tostring_func }}
 end
 
 local function readable_char(char, type)
@@ -76,25 +97,42 @@ local function readable_char(char, type)
 	end
 end
 
-local expression_tostring_funcs = {
-	call = function(self, env)
-		return fill_template('${function}(${arguments})', self, {arguments = ', '}, env)
-	end
-}
+local statement_tostring_table = {
+	expression = '$>${expression};\n',
+	['return'] = '$>return ${value};\n',
+	vardef = template_func('$>${modifiers}${type} ${quads};\n', {modifiers = ' '}),
 
-local statement_tostring_funcs = {
-	expression = function(self, env)
-		return fill_template(
-			'$>${expression};\n', 
-			{expression = expression_tostring_funcs[self.expression.type](self.expression, env)}, 
-			env
-		)
+	['while'] = function(self, indent)
+		return fill_template("$>while(${condition})", self, nil, indent) .. 
+			   fill_template('${body}', self, nil, indent+1)
 	end,
 
-	['return'] = function(self, env)
-		return fill_template('$>return ${value};\n', self, env)
+	compound = function(self, indent)
+		return fill_template('{\n${statements}', self, {statements = ''}, indent)
+			.. fill_template('$>}\n', nil, nil, indent-1)  
 	end
 }
+
+local expression_tostring_table = {
+	less = '${left}<${right}',
+	post_increment = '${ref}++',
+	post_decrement = '${ref}--',
+	call = template_func('${function}(${arguments})', {arguments = ', '}),
+}
+
+local tostring_func_from_table = function(t, field)
+	return function(self, indent)
+		local key = self[field]
+		local value = t[key]
+		if type(value) == 'string' then
+			return fill_template(value, self, nil, indent)
+		elseif type(value) == 'function' then
+			return value(self, indent)
+		else
+			error("no tostring for object:" .. json.encode(self))
+		end
+	end
+end
 
 local metatables = {
 	integer = {
@@ -144,48 +182,17 @@ local metatables = {
 			size = function() return #self.value + 1 end
 		}
 	},
-	global = {
-		__index = {
-			tostring = function(self)
-				return fill_template('${modifiers }${type} ${quads};', self, {modifiers = ' ', quads = ', '})
-			end,
-		}
-	},
-	['function'] = {
-		__index = {
-			tostring = function(self)
-				return fill_template('${return_type} ${name}(${parameters}){\n${body}}', self, {parameters = ', '}, {indent = 1})
-			end,
-		}
-	},
-	vardef_quad = {
-		__index = {
-			tostring = function(self)
-				return fill_template("${stars}${name}${[array_count]}${ = initializer}", self)
-			end
-		}
-	},
-	parameter = {
-		__index = {
-			tostring = function(self)
-				return fill_template('${type }${stars}${name}', self)
-			end
-		}
-	},
-	statement = {
-		__index = function(self, index)
-			if index == 'tostring' then
-				return statement_tostring_funcs[self.statement]
-			end
+	global = tostring_metatable(template_func('${modifiers }${type} ${quads};', {modifiers = ' ', quads = ', '})),
+	['function'] = tostring_metatable(
+		function(self)
+			return fill_template('${return_type} ${name}(${parameters}){\n${body}}', self, {parameters = ', '}, 1)
 		end
-	},
-	variable = {
-		__index = {
-			tostring = function(self)
-				return self.value
-			end
-		}
-	}
+	),
+	vardef_quad = tostring_metatable(template_func '${stars}${name}${[array_count]}${ = initializer}'),
+	parameter = tostring_metatable(template_func '${type }${stars}${name}'),
+	statement = tostring_metatable(tostring_func_from_table(statement_tostring_table, 'statement')),
+	variable = tostring_metatable(function(self) return self.value end),
+	expression = tostring_metatable(tostring_func_from_table(expression_tostring_table, 'type')),
 }
 
 local function create_value(type, value)
@@ -218,7 +225,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:}? S ')'
 	function_body <- compound_statement -> statements_from_compound
 
-	expression <- p14_expression
+	expression <- p14_expression -> expression
 	p0_expression <- 
 		literal_value 
 		/ variable 
@@ -454,6 +461,7 @@ local grammar = re.compile([[
 	vardef_quad = create_mt_setter('vardef_quad'),
 	parameter = create_mt_setter('parameter'),
 	statement = create_mt_setter('statement'),
+	expression = function(t) return getmetatable(t) and t or setmetatable(t, metatables.expression) end,
 })
 
 local session = {}
@@ -476,7 +484,6 @@ end
 function session:show_definitions(format)
 	format = format or 'yaml'
 	if format == 'json' then
-		local json = require 'dkjson'
 		print(json.encode(self.definitions, {indent = true}))
 	elseif format == 'yaml' then
 		local yaml = require 'yaml'
@@ -485,7 +492,7 @@ function session:show_definitions(format)
 end
 
 function session:decompile()
-	return fill_template("${definitions}", self, {definitions = "\n"})
+	return fill_template("${definitions}", self, {definitions = "\n"}, 0)
 end
 
 return {
