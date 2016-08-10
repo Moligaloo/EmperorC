@@ -92,9 +92,9 @@ end
 local statement_tostring_table = {
 	expression = '${expression};',
 	['return'] = 'return ${value};',
-	vardef = template_func('${modifiers}${type} ${quads};', {modifiers = ' '}),
-	['while'] = 'while(${condition})${body}',
-	['for'] = 'for(${init} ${condition}; ${next})${body}',
+	vardef = template_func('${modifiers}${type} ${quads};', {modifiers = ' ', quads = ', '}),
+	['while'] = 'while(${condition})\n${body}',
+	['for'] = 'for(${init} ${condition}; ${next})\n${body}',
 	['if'] = function(self)
 		if self['else'] then
 			return fill_template('if(${condition})${body}else ${else}', self)
@@ -106,10 +106,12 @@ local statement_tostring_table = {
 }
 
 local expression_tostring_table = {
-	less = '${left}<${right}',
 	post_increment = '${ref}++',
 	post_decrement = '${ref}--',
-	greater = '${left}<${right}',
+	greater = '${left}>${right}',
+	less = '${left}<${right}',
+	less_equal = '${left} <= ${right}',
+	greater_equal = '${left} >= ${right}',
 	call = template_func('${function}(${arguments})', {arguments = ', '}),
 	pre_increment = '++${expression}',
 	pre_decrement = '--${expression}',
