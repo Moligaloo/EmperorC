@@ -99,7 +99,7 @@ local statement_tostring_table = {
 	end,
 
 	['for'] = function(self)
-		return fill_template('for(${init}; ${condition}; ${next})', self)
+		return fill_template('for(${init} ${condition}; ${next})${body}', self)
 	end,
 
 	compound = function(self)
