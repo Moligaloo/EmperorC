@@ -111,6 +111,35 @@ local expression_tostring_table = {
 	post_decrement = '${ref}--',
 	greater = '${left}<${right}',
 	call = template_func('${function}(${arguments})', {arguments = ', '}),
+	pre_increment = '++${expression}',
+	pre_decrement = '--${expression}',
+	negate = '-${expression}',
+	['not'] = '!${expression}',
+	cast = '(${cast})${expression}',
+	deref = '*${expression}',
+	addr = '&${expression}',
+	sizeof = function(self) 
+		return fill_template(self.vartype and 'sizeof(${vartype})' or 'sizeof(${expression})', self)
+	end,
+	multiply = '${left}*${right}',
+	modular = '${left}%${right}',
+	subtract = '${left}-${right}',
+	add = '${left}+${right}',
+	left_shift = '${left} << ${right}',
+	right_shift = '${left} >> ${right}',
+	greater_equal = '${left} >= ${right}',
+	equal = '${left} == ${right}',
+	not_equal = '${left} != ${right}',
+	bitwise_and = '${left} & ${right}',
+	bitwise_or = '${left} | ${right}',
+	bitwise_xor = '${left} ^ ${right}',
+	logic_and = '${left} && ${right}',
+	logic_or = '${left} || ${right}',
+	ternary = '${condition} ? ${yes} : ${no}',
+	assign = '${left} ${extra}= ${right}',
+	subscript = '${ref}[${subscript}]',
+	arrow = '${ref}->${member}',
+	dot = '${ref}.${member}',
 }
 
 local tostring_func_from_table = function(t, field)
@@ -407,18 +436,21 @@ local grammar = re.compile([[
 						['function'] = tree,
 						arguments = postfix.arguments
 					}
+					setmetatable(tree, metatables.expression)
 				elseif type == 'dot' or type == 'arrow' or type == 'post_increment' or type == 'post_decrement' then
 					tree = {
 						type = type,
 						ref = tree,
 						member = postfix.member
 					}
+					setmetatable(tree, metatables.expression)
 				elseif type == 'subscript' then
 					tree = {
 						type = 'subscript',
 						ref = tree,
 						subscript = postfix.subscript
 					}
+					setmetatable(tree, metatables.expression)
 				end
 			end
 		end
@@ -446,6 +478,7 @@ local grammar = re.compile([[
 				type = suffix.type,
 				right = suffix.right
 			}
+			setmetatable(expression, metatables.expression)
 			left = expression
 		end
 		return expression
