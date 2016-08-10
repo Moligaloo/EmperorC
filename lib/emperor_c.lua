@@ -93,24 +93,23 @@ local statement_tostring_table = {
 	expression = '${expression};',
 	['return'] = 'return ${value};',
 	vardef = template_func('${modifiers}${type} ${quads};', {modifiers = ' '}),
-
-	['while'] = function(self)
-		return fill_template("while(${condition})${body}", self)
+	['while'] = 'while(${condition})${body}',
+	['for'] = 'for(${init} ${condition}; ${next})${body}',
+	['if'] = function(self)
+		if self['else'] then
+			return fill_template('if(${condition})${body}else ${else}', self)
+		else
+			return fill_template('if(${condition})${body}', self)
+		end
 	end,
-
-	['for'] = function(self)
-		return fill_template('for(${init} ${condition}; ${next})${body}', self)
-	end,
-
-	compound = function(self)
-		return fill_template('{\n${statements}\n}', self, {statements = '\n'})
-	end
+	compound = template_func('{\n${statements}\n}', {statements = '\n'}),
 }
 
 local expression_tostring_table = {
 	less = '${left}<${right}',
 	post_increment = '${ref}++',
 	post_decrement = '${ref}--',
+	greater = '${left}<${right}',
 	call = template_func('${function}(${arguments})', {arguments = ', '}),
 }
 
@@ -167,6 +166,8 @@ local metatables = {
 						local byte = string.byte(char)
 						if reverse_escaped_char_map[byte] then
 							return "\\" .. reverse_escaped_char_map[byte]
+						elseif byte == 0x20 then
+							return ' '
 						else
 							return ("\\x%02X"):format(byte)
 						end
