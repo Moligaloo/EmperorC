@@ -30,14 +30,10 @@ local function map(list, func)
 	return mapped
 end
 
-local function spaces(count)
-	return string.rep(' ', count * 4)
-end
-
-local function object_tostring(object, indent)
+local function object_tostring(object)
 	if type(object) == 'table' then
 		if object.tostring then
-			return object:tostring(indent)
+			return object:tostring()
 		else
 			error(("object %s has no tostring method"):format(json.encode(object)))
 		end
@@ -46,31 +42,27 @@ local function object_tostring(object, indent)
 	end
 end
 
-local function fill_template(template, t, sep, indent)
+local function fill_template(template, t, sep)
 	local result = template:gsub("%${([^%w_]*)([%w_]+)([^%w_}]*)}", function(prefix, key, suffix)
 			local result = t[key]
 			if result == nil then
 				return ''
 			elseif type(result) == 'table' then
 				if getmetatable(result) == nil then
-					result = table.concat(map(result, function(e) return object_tostring(e, indent) end), sep[key])
+					result = table.concat(map(result, function(e) return object_tostring(e) end), sep[key])
 				else
-					result = object_tostring(result, indent)
+					result = object_tostring(result)
 				end
 			end
 
 			return ("%s%s%s"):format(prefix, result, suffix)
 		end)
 
-	if indent then
-		result = result:gsub('%$>', spaces(indent))
-	end
-
 	return result
 end
 
 local template_func = function(template, sep)
-	return function(self, indent) return fill_template(template, self, sep, indent) end
+	return function(self) return fill_template(template, self, sep) end
 end
 
 local tostring_metatable = function(tostring_func)
@@ -98,18 +90,20 @@ local function readable_char(char, type)
 end
 
 local statement_tostring_table = {
-	expression = '$>${expression};\n',
-	['return'] = '$>return ${value};\n',
-	vardef = template_func('$>${modifiers}${type} ${quads};\n', {modifiers = ' '}),
+	expression = '${expression};',
+	['return'] = 'return ${value};',
+	vardef = template_func('${modifiers}${type} ${quads};', {modifiers = ' '}),
 
-	['while'] = function(self, indent)
-		return fill_template("$>while(${condition})", self, nil, indent) .. 
-			   fill_template('${body}', self, nil, indent+1)
+	['while'] = function(self)
+		return fill_template("while(${condition})${body}", self)
 	end,
 
-	compound = function(self, indent)
-		return fill_template('{\n${statements}', self, {statements = ''}, indent)
-			.. fill_template('$>}\n', nil, nil, indent-1)  
+	['for'] = function(self)
+		return fill_template('for(${init}; ${condition}; ${next})', self)
+	end,
+
+	compound = function(self)
+		return fill_template('{\n${statements}\n}', self, {statements = '\n'})
 	end
 }
 
@@ -121,13 +115,13 @@ local expression_tostring_table = {
 }
 
 local tostring_func_from_table = function(t, field)
-	return function(self, indent)
+	return function(self)
 		local key = self[field]
 		local value = t[key]
 		if type(value) == 'string' then
-			return fill_template(value, self, nil, indent)
+			return fill_template(value, self)
 		elseif type(value) == 'function' then
-			return value(self, indent)
+			return value(self)
 		else
 			error("no tostring for object:" .. json.encode(self))
 		end
@@ -185,7 +179,7 @@ local metatables = {
 	global = tostring_metatable(template_func('${modifiers }${type} ${quads};', {modifiers = ' ', quads = ', '})),
 	['function'] = tostring_metatable(
 		function(self)
-			return fill_template('${return_type} ${name}(${parameters}){\n${body}}', self, {parameters = ', '}, 1)
+			return fill_template('${return_type} ${name}(${parameters}){\n${body}\n}', self, {parameters = ', ', body = '\n'}, 1)
 		end
 	),
 	vardef_quad = tostring_metatable(template_func '${stars}${name}${[array_count]}${ = initializer}'),
@@ -491,8 +485,8 @@ function session:show_definitions(format)
 	end
 end
 
-function session:decompile()
-	return fill_template("${definitions}", self, {definitions = "\n"}, 0)
+function session:decompile(pretty)
+	return fill_template("${definitions}", self, {definitions = "\n"})
 end
 
 return {
