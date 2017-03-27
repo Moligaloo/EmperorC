@@ -22,7 +22,7 @@ love tools/qinhuang
 Run command-line script
 
 ```shell
-./tools/hanwu <arguments>
+./hanwu.lua <action> <source>
 ```
 
 ## Test 
@@ -49,7 +49,7 @@ If you want to make it run indepently, i.e. make the .love archive to a distribu
 
 ### Command line tool
 
-Install related lua dependencies and copy tools/hanwu to your `$PATH`.
+Install related lua dependencies(lpeg & dkjson) and copy `hanwu.lua` to your `$PATH`.
 
 ## Documentation
 
