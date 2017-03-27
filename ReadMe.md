@@ -16,7 +16,7 @@ The GUI front-end is named `qinhuang`, and the command-line script is called `ha
 Run GUI front-end 
 
 ```shell
-love tools/qinhuang
+love qinhuang
 ```
 
 Run command-line script
