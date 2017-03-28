@@ -511,6 +511,13 @@ function session:load(filename)
 	return self.definitions
 end
 
+function session:to_ast(filename)
+	local fp = io.open(filename, 'w')
+	fp:write(json.encode(self.definitions, {indent = true}))
+	fp:write("\n")
+	fp:close()
+end
+
 function session:show_definitions(format)
 	format = format or 'yaml'
 	if format == 'json' then
