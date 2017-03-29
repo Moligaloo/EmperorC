@@ -7,13 +7,13 @@ EmperorC is a toolkit (including library, GUI frond-end, and command-line tool) 
 The library is `emperor_c.lua`, it depends two Lua libraries which are contained in the `3rd` directory:
 
 - [lpeg](http://www.inf.puc-rio.br/~roberto/lpeg/),  a pattern matching library for Lua
-- [dkjson](https://github.com/LuaDist/dkjson) ,a lua json decoder/encoder.
+- [dkjson](https://github.com/LuaDist/dkjson), a lua json decoder/encoder.
 
 The GUI front-end is named `qinhuang`, and the command-line script is called `hanwu`, they are famous emperors in China's history.
 
 ## Run from source
 
-Run GUI front-end 
+Run GUI front-end directly from source, this is based on [love2d](https://love2d.org/).
 
 ```shell
 love qinhuang
@@ -37,7 +37,7 @@ make test
 
 ### GUI frond-end
 
-GUI front-end is based on [love2d](https://love2d.org/), run following command will create a love archive called `qinhuang.love` in the current directory.
+Run following command will create a love archive called `qinhuang.love` in the current directory.
 
 ```shell
 make qinhuang
