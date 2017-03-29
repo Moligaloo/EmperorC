@@ -251,7 +251,6 @@ local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
 	definition <- (function_definition / global_variable_definition)
 	global_variable_definition <- {| {:definition: '' -> 'global' :} <vardef> |} 
-	static_initializer <- '=' S {: literal_value :}
 
 	-- literal value
 	literal_value <- float / integer / character / string
