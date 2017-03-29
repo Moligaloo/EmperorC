@@ -247,6 +247,10 @@ local function create_mt_setter(metatable_name)
 	return function(t) return setmetatable(t, mt) end
 end
 
+-- grammar rule name convention:
+-- 1. terminal symbols use all uppercased name: e.g. SEMICOLON
+-- 2. non terminal symbols use all lowercased name, word separated by _, e.g. global_variable_definition
+
 local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
 	definition <- (function_definition / global_variable_definition)
