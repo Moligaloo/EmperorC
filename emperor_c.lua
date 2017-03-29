@@ -494,6 +494,20 @@ local grammar = re.compile([[
 	expression = function(t) return getmetatable(t) and t or setmetatable(t, metatables.expression) end,
 })
 
+local function read_file(filename)
+	local file = io.open(filename)
+	local content = file:read '*a'
+	file:close()
+
+	return content
+end
+
+local function write_file(filename, content)
+	local file = io.open(filename, 'w')
+	file:write(content)
+	file:close()
+end
+
 local session = {}
 session.__index = session
 
@@ -501,21 +515,12 @@ function session.new()
 	return setmetatable({}, session)
 end
 
-function session:load(filename)
-	local file = io.open(filename)
-	local content = file:read '*a'
-	file:close()
-
-	self.definitions = grammar:match(content)
-	
-	return self.definitions
+function session:load_c(filename)
+	self.definitions = grammar:match(read_file(filename))
 end
 
 function session:to_ast(filename)
-	local fp = io.open(filename, 'w')
-	fp:write(json.encode(self.definitions, {indent = true}))
-	fp:write("\n")
-	fp:close()
+	write_file(filename, json.encode(self.definitions, {indent = true}))
 end
 
 function session:show_definitions(format)
@@ -528,7 +533,7 @@ function session:show_definitions(format)
 	end
 end
 
-function session:decompile(pretty)
+function session:decompile()
 	return fill_template("${definitions}", self, {definitions = "\n"})
 end
 
