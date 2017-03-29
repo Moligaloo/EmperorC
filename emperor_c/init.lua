@@ -30,19 +30,42 @@ local function map(list, func)
 	return mapped
 end
 
+local fill_template
+
+local function ast_to_string(ast)
+	if ast.definition then
+		local definition = ast.definition
+		if definition == 'global' then
+			return fill_template(
+				'${modifiers }${type} ${quads};', 
+				ast, 
+				{modifiers = ' ', quads = ', '}
+			)
+		elseif definition == 'function' then
+			return fill_template(
+				'${return_type} ${name}(${parameters}){\n${body}\n}',
+				ast, 
+				{parameters = ', ', body = '\n'}
+			)
+		end
+	end
+
+	error(("object %s has no tostring method"):format(json.encode(ast)))
+end
+
 local function object_tostring(object)
 	if type(object) == 'table' then
 		if object.tostring then
 			return object:tostring()
 		else
-			error(("object %s has no tostring method"):format(json.encode(object)))
+			return ast_to_string(object)
 		end
 	else
 		return tostring(object)
 	end
 end
 
-local function fill_template(template, t, sep)
+function fill_template(template, t, sep)
 	local result = template:gsub("%${([^%w_]*)([%w_]+)([^%w_}]*)}", function(prefix, key, suffix)
 			local result = t[key]
 			if result == nil then
@@ -208,12 +231,6 @@ local metatables = {
 			size = function() return #self.value + 1 end
 		}
 	},
-	global = tostring_metatable(template_func('${modifiers }${type} ${quads};', {modifiers = ' ', quads = ', '})),
-	['function'] = tostring_metatable(
-		function(self)
-			return fill_template('${return_type} ${name}(${parameters}){\n${body}\n}', self, {parameters = ', ', body = '\n'}, 1)
-		end
-	),
 	vardef_quad = tostring_metatable(template_func '${stars}${name}${[array_count]}${ = initializer}'),
 	parameter = tostring_metatable(template_func '${type }${stars}${name}'),
 	statement = tostring_metatable(tostring_func_from_table(statement_tostring_table, 'statement')),
@@ -232,7 +249,7 @@ end
 
 local grammar = re.compile([[
 	definitions <- {| (S definition S)+ |}
-	definition <- (function_definition / global_variable_definition) -> definition
+	definition <- (function_definition / global_variable_definition)
 	global_variable_definition <- {| {:definition: '' -> 'global' :} <vardef> |} 
 	static_initializer <- '=' S {: literal_value :}
 
@@ -484,9 +501,6 @@ local grammar = re.compile([[
 			left = expression
 		end
 		return expression
-	end,
-	definition = function(t)
-		return setmetatable(t, metatables[t.definition])
 	end,
 	vardef_quad = create_mt_setter('vardef_quad'),
 	parameter = create_mt_setter('parameter'),
