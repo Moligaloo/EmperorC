@@ -4,7 +4,7 @@
 
 EmperorC is a toolkit (including library, GUI frond-end, and command-line tool) for parsing and analyzing C source code written in Lua scripting language.
 
-The library is `emperor_c.lua`, it depends two Lua libraries which are contained in the `3rd` directory:
+The library's files are inside `emperor_c` directory, it depends two Lua libraries which are contained in the `3rd` directory:
 
 - [lpeg](http://www.inf.puc-rio.br/~roberto/lpeg/),  a pattern matching library for Lua
 - [dkjson](https://github.com/LuaDist/dkjson), a lua json decoder/encoder.

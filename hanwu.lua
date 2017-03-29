@@ -13,6 +13,8 @@ if action_name == nil or source == nil then
   return
 end
 
+package.path = package.path .. ";./?/init.lua"
+
 local emperor = require 'emperor_c'
 
 local pattern_to_type = {
