@@ -22,7 +22,7 @@ love qinhuang
 Run command-line script
 
 ```shell
-./hanwu.lua <action> <source>
+./hanwu.lua <action> <source> <optional target>
 ```
 
 ## Test 
