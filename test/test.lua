@@ -1,3 +1,5 @@
+package.path = package.path .. ";./?/init.lua"
+
 local emperor = require 'emperor_c'
 local json = require '3rd.dkjson'
 
@@ -12,7 +14,9 @@ for _, file in ipairs{'hello', 'globals', 'while', 'expression', 'selection'} do
 	it("Testing file " .. file, function() 
 		local c_source = ("test/c/%s.c"):format(file)
 		local json_source = io_read(("test/ast/%s.json"):format(file))
+		local session = emperor.session.new()
+		session:load_c(c_source)
 
-		assert.same(emperor.session.new():load(c_source), json.decode(json_source))
+		assert.same(session.definitions, json.decode(json_source))
 	end)
 end
