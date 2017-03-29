@@ -9,7 +9,7 @@ The library is `emperor_c.lua`, it depends two Lua libraries which are contained
 - [lpeg](http://www.inf.puc-rio.br/~roberto/lpeg/),  a pattern matching library for Lua
 - [dkjson](https://github.com/LuaDist/dkjson), a lua json decoder/encoder.
 
-The GUI front-end is named `qinhuang`, and the command-line script is called `hanwu`, they are famous emperors in China's history.
+The GUI front-end is named `qinhuang`, and the command-line script is called `hanwu.lua`, they are famous emperors in China's history.
 
 ## Run from source
 
