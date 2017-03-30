@@ -32,25 +32,37 @@ end
 
 local fill_template
 
-local function ast_to_string(ast)
-	if ast.definition then
-		local definition = ast.definition
-		if definition == 'global' then
-			return fill_template(
-				'${modifiers }${type} ${quads};', 
-				ast, 
-				{modifiers = ' ', quads = ', '}
-			)
-		elseif definition == 'function' then
-			return fill_template(
-				'${return_type} ${name}(${parameters}){\n${body}\n}',
-				ast, 
-				{parameters = ', ', body = '\n'}
-			)
+local template_func = function(template, sep)
+	return function(self) return fill_template(template, self, sep) end
+end
+
+local ast_to_string_table = {
+	definition = {
+		global = template_func('${modifiers }${type} ${quads};', {modifiers = ' ', quads = ', '}),
+		['function'] = template_func('${return_type} ${name}(${parameters}){\n${body}\n}', {parameters = ', ', body = '\n'})
+	}
+}
+
+local function ast_to_string(ast, node)
+	node = node or ast_to_string_table
+	for key, subnode in pairs(node) do
+		local astkey = ast[key]
+		if astkey then
+			local grandnode = subnode[astkey]
+			local grandnode_type = type(grandnode)
+			if grandnode_type == 'string' then
+				return fill_template(grandnode, ast)
+			elseif grandnode_type == 'function' then
+				return grandnode(ast)
+			elseif grandnode_type == 'table' then
+				return ast_to_string(ast, grandnode)
+			else
+				error(("Unknown node type: %s"):format(grandnode_type))
+			end
+		else
+			error(("ast %s can not cast to string"):format(json.encode(ast)))
 		end
 	end
-
-	error(("object %s has no tostring method"):format(json.encode(ast)))
 end
 
 local function object_tostring(object)
@@ -82,10 +94,6 @@ function fill_template(template, t, sep)
 		end)
 
 	return result
-end
-
-local template_func = function(template, sep)
-	return function(self) return fill_template(template, self, sep) end
 end
 
 local tostring_metatable = function(tostring_func)
