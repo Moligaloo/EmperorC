@@ -19,87 +19,6 @@ for key, value in pairs(escaped_char_map) do
 	reverse_escaped_char_map[value] = key
 end
 
-local function map(list, func)
-	local mapped = {}
-	for _, elem in ipairs(list) do
-		local result = func(elem)
-		if result then
-			table.insert(mapped, result)
-		end
-	end
-	return mapped
-end
-
-local fill_template
-
-local template_func = function(template, sep)
-	return function(self) return fill_template(template, self, sep) end
-end
-
-local ast_to_string_table = {
-	definition = {
-		global = template_func('${modifiers }${type} ${quads};', {modifiers = ' ', quads = ', '}),
-		['function'] = template_func('${return_type} ${name}(${parameters}){\n${body}\n}', {parameters = ', ', body = '\n'})
-	}
-}
-
-local function ast_to_string(ast, node)
-	node = node or ast_to_string_table
-	for key, subnode in pairs(node) do
-		local astkey = ast[key]
-		if astkey then
-			local grandnode = subnode[astkey]
-			local grandnode_type = type(grandnode)
-			if grandnode_type == 'string' then
-				return fill_template(grandnode, ast)
-			elseif grandnode_type == 'function' then
-				return grandnode(ast)
-			elseif grandnode_type == 'table' then
-				return ast_to_string(ast, grandnode)
-			else
-				error(("Unknown node type: %s"):format(grandnode_type))
-			end
-		else
-			error(("ast %s can not cast to string"):format(json.encode(ast)))
-		end
-	end
-end
-
-local function object_tostring(object)
-	if type(object) == 'table' then
-		if object.tostring then
-			return object:tostring()
-		else
-			return ast_to_string(object)
-		end
-	else
-		return tostring(object)
-	end
-end
-
-function fill_template(template, t, sep)
-	local result = template:gsub("%${([^%w_]*)([%w_]+)([^%w_}]*)}", function(prefix, key, suffix)
-			local result = t[key]
-			if result == nil then
-				return ''
-			elseif type(result) == 'table' then
-				if getmetatable(result) == nil then
-					result = table.concat(map(result, function(e) return object_tostring(e) end), sep[key])
-				else
-					result = object_tostring(result)
-				end
-			end
-
-			return ("%s%s%s"):format(prefix, result, suffix)
-		end)
-
-	return result
-end
-
-local tostring_metatable = function(tostring_func)
-	return { __index = { tostring = tostring_func }}
-end
-
 local function readable_char(char, type)
 	local str = string.char(char)
 
@@ -120,103 +39,68 @@ local function readable_char(char, type)
 	end
 end
 
-local statement_tostring_table = {
-	expression = '${expression};',
-	['return'] = 'return ${value};',
-	vardef = template_func('${modifiers}${type} ${quads};', {modifiers = ' ', quads = ', '}),
-	['while'] = 'while(${condition})\n${body}',
-	['for'] = 'for(${init} ${condition}; ${next})\n${body}',
-	['if'] = function(self)
-		if self['else'] then
-			return fill_template('if(${condition})${body}else ${else}', self)
-		else
-			return fill_template('if(${condition})${body}', self)
-		end
-	end,
-	compound = template_func('{\n${statements}\n}', {statements = '\n'}),
-}
-
-local expression_tostring_table = {
-	post_increment = '${ref}++',
-	post_decrement = '${ref}--',
-	greater = '${left}>${right}',
-	less = '${left}<${right}',
-	less_equal = '${left} <= ${right}',
-	greater_equal = '${left} >= ${right}',
-	call = template_func('${function}(${arguments})', {arguments = ', '}),
-	pre_increment = '++${expression}',
-	pre_decrement = '--${expression}',
-	negate = '-${expression}',
-	['not'] = '!${expression}',
-	cast = '(${cast})${expression}',
-	deref = '*${expression}',
-	addr = '&${expression}',
-	sizeof = function(self) 
-		return fill_template(self.vartype and 'sizeof(${vartype})' or 'sizeof(${expression})', self)
-	end,
-	multiply = '${left}*${right}',
-	modular = '${left}%${right}',
-	subtract = '${left}-${right}',
-	add = '${left}+${right}',
-	left_shift = '${left} << ${right}',
-	right_shift = '${left} >> ${right}',
-	greater_equal = '${left} >= ${right}',
-	equal = '${left} == ${right}',
-	not_equal = '${left} != ${right}',
-	bitwise_and = '${left} & ${right}',
-	bitwise_or = '${left} | ${right}',
-	bitwise_xor = '${left} ^ ${right}',
-	logic_and = '${left} && ${right}',
-	logic_or = '${left} || ${right}',
-	ternary = '${condition} ? ${yes} : ${no}',
-	assign = '${left} ${extra}= ${right}',
-	subscript = '${ref}[${subscript}]',
-	arrow = '${ref}->${member}',
-	dot = '${ref}.${member}',
-}
-
-local tostring_func_from_table = function(t, field)
-	return function(self)
-		local key = self[field]
-		local value = t[key]
-		if type(value) == 'string' then
-			return fill_template(value, self)
-		elseif type(value) == 'function' then
-			return value(self)
-		else
-			error("no tostring for object:" .. json.encode(self))
+local function map(list, func)
+	local mapped = {}
+	for _, elem in ipairs(list) do
+		local result = func(elem)
+		if result then
+			table.insert(mapped, result)
 		end
 	end
+	return mapped
 end
 
-local metatables = {
-	integer = {
-		__index = {
-			tostring = function(self)
-				return ("%d"):format(self.value)
-			end,
-			size = function() return 4 end
+
+
+local function errorf(format, ...)
+	error(format:format(...))
+end
+
+local function table_is_object(t)
+	return next(t) and t[1] == nil
+end
+
+local fill_template
+
+local template_func = function(template, sep)
+	return function(self) return fill_template(template, self, sep) end
+end
+
+local ast_to_string_list = {
+	{
+		type = 'definition',
+		table =  {
+			global = template_func('${modifiers }${type} ${quads:vardef_quad};', {modifiers = ' ', quads = ', '}),
+			['function'] = template_func('${return_type} ${name}(${parameters:parameter}){\n${body}\n}', {parameters = ', ', body = '\n'})
 		}
 	},
-	float = {
-		__index = {
-			tostring = function(self)
-				return ("%g"):format(self.value)
+
+	{
+		type = 'statement',
+		table = {
+			expression = '${expression};',
+			['return'] = 'return ${value};',
+			vardef = template_func('${modifiers}${type} ${quads:vardef_quad};', {modifiers = ' ', quads = ', '}),
+			['while'] = 'while(${condition})\n${body}',
+			['for'] = 'for(${init} ${condition}; ${next})\n${body}',
+			['if'] = function(self)
+				if self['else'] then
+					return fill_template('if(${condition})${body}else ${else}', self)
+				else
+					return fill_template('if(${condition})${body}', self)
+				end
 			end,
-			size = function() return 4 end
+			compound = template_func('{\n${statements}\n}', {statements = '\n'}),
 		}
 	},
-	character = {
-		__index = {
-			tostring = function(self)
-				return ("'%s'"):format(readable_char(self.value, 'char'))
-			end,
-			size = function() return 1 end
-		}
-	},
-	string = {
-		__index = {
-			tostring = function(self)
+
+	{
+		type = 'type',
+		table = {
+			integer = function(self) return ("%d"):format(self.value) end,
+			float = function(self) return ("%g"):format(self.value) end,
+			character = function(self) return ("'%s'"):format(readable_char(self.value, 'char')) end,
+			string = function(self)
 				return ('"%s"'):format(self.value:gsub(".", function(char)
 					if char == '"' then
 						return '\\"'
@@ -236,23 +120,127 @@ local metatables = {
 					end
 				end))
 			end,
-			size = function() return #self.value + 1 end
+			
+			variable = function(self) return self.value end,
+
+			call = template_func('${function}(${arguments})', {arguments = ', '}),
+			post_increment = '${ref}++',
+			post_decrement = '${ref}--',
+			greater = '${left}>${right}',
+			less = '${left}<${right}',
+			less_equal = '${left} <= ${right}',
+			greater_equal = '${left} >= ${right}',
+			call = template_func('${function}(${arguments})', {arguments = ', '}),
+			pre_increment = '++${expression}',
+			pre_decrement = '--${expression}',
+			negate = '-${expression}',
+			['not'] = '!${expression}',
+			cast = '(${cast})${expression}',
+			deref = '*${expression}',
+			addr = '&${expression}',
+			sizeof = function(self) 
+				return fill_template(self.vartype and 'sizeof(${vartype})' or 'sizeof(${expression})', self)
+			end,
+			multiply = '${left}*${right}',
+			modular = '${left}%${right}',
+			subtract = '${left}-${right}',
+			add = '${left}+${right}',
+			left_shift = '${left} << ${right}',
+			right_shift = '${left} >> ${right}',
+			greater_equal = '${left} >= ${right}',
+			equal = '${left} == ${right}',
+			not_equal = '${left} != ${right}',
+			bitwise_and = '${left} & ${right}',
+			bitwise_or = '${left} | ${right}',
+			bitwise_xor = '${left} ^ ${right}',
+			logic_and = '${left} && ${right}',
+			logic_or = '${left} || ${right}',
+			ternary = '${condition} ? ${yes} : ${no}',
+			assign = '${left} ${extra}= ${right}',
+			subscript = '${ref}[${subscript}]',
+			arrow = '${ref}->${member}',
+			dot = '${ref}.${member}',
 		}
-	},
-	vardef_quad = tostring_metatable(template_func '${stars}${name}${[array_count]}${ = initializer}'),
-	parameter = tostring_metatable(template_func '${type }${stars}${name}'),
-	statement = tostring_metatable(tostring_func_from_table(statement_tostring_table, 'statement')),
-	variable = tostring_metatable(function(self) return self.value end),
-	expression = tostring_metatable(tostring_func_from_table(expression_tostring_table, 'type')),
+	}
 }
 
-local function create_value(type, value)
-	return setmetatable({type = type, value = value}, metatables[type])
+local element_to_string_table = {
+	parameter = '${type }${stars}${name}',
+	vardef_quad = '${stars}${name}${[array_count]}${ = initializer}',
+}
+
+local function ast_to_string(ast, item)
+	if item then
+		local item_type = type(item)
+		if item_type == 'string' then
+			return fill_template(item, ast)
+		elseif item_type == 'function' then
+			return item(ast)
+		else
+			error(("Unsupported item type %s"):format(item_type))
+		end
+	end
+
+	if type(ast) == 'table' then
+		for _, pair in ipairs(ast_to_string_list) do
+			local ast_type = pair.type
+			local ast_table = pair.table
+
+			local ast_subtype = ast[ast_type]
+			if type(ast_subtype) == 'string' then
+				local item = ast_table[ast_subtype]
+				if item then
+					return ast_to_string(ast, item)
+				else
+					errorf("%s is not found in ast_table! ast detail: %s", ast_subtype, json.encode(ast))
+				end						
+			end
+		end
+
+		error(("ast %s can not cast to string"):format(json.encode(ast)))
+	else
+		return tostring(ast)
+	end
 end
 
-local function create_mt_setter(metatable_name)
-	local mt = metatables[metatable_name]
-	return function(t) return setmetatable(t, mt) end
+function fill_template(template, t, sep)
+   local result = template:gsub(
+   	"${([^%w_:]*)([%w_:]+)([^%w_:}]*)}",
+    function(prefix, key, suffix)
+    	local type_spec
+    	if key:match ':' then
+    		type_spec = key:match ':([%w_]+)$'
+    		key = key:match '^([%w_]+):'
+    	end
+
+    	local result = t[key]
+		if result == nil then
+			return ''
+		end
+
+		if type(result) == 'table' then
+			if table_is_object(result) then
+				result = ast_to_string(result)
+			else
+				local elem_to_string_item 
+				if type_spec then
+					elem_to_string_item = element_to_string_table[type_spec]
+		    		if elem_to_string_item == nil then
+		    			errorf("element type %s can not cast to string!", type_spec)
+		    		end
+		    	end
+				result = table.concat(map(result, function(e) return ast_to_string(e, elem_to_string_item) end), sep[key])
+			end
+		end
+
+		return ("%s%s%s"):format(prefix, result, suffix)
+	end)
+
+	return result
+end
+
+local function create_value(type, value)
+	return {type = type, value = value}
 end
 
 -- grammar rule name convention:
@@ -279,7 +267,7 @@ local grammar = re.compile([[
 	function_head <- {:return_type:RETURN_TYPE:} S {:name:IDENTIFIER:} S '(' S {:parameters:parameters:}? S ')'
 	function_body <- compound_statement -> statements_from_compound
 
-	expression <- p14_expression -> expression
+	expression <- p14_expression
 	p0_expression <- 
 		literal_value 
 		/ variable 
@@ -364,7 +352,7 @@ local grammar = re.compile([[
 		/ vardef_statement 
 		/ expression_statement 
 		/ iteration_statement
-		/ selection_statement) -> statement
+		/ selection_statement)
 	compound_statement <- {| {:statement: '' -> 'compound' :} BRACE_L {:statements:statements:} BRACE_R |} 
 	expression_statement <- {| {:statement: '' -> 'expression' :} {:expression: expression :} SEMICOLON |}
 	iteration_statement <- {| iteration_while / iteration_for |}
@@ -386,14 +374,14 @@ local grammar = re.compile([[
 	jump_return <- {:statement: 'return' :} S {:value: expression :}?
 
 	vardef_statement <- {| {:statement: '' -> 'vardef' :} <vardef> |} 
-	parameter <- {| {:type: VAR_TYPE :} S <vardef_stars>? S {:name:IDENTIFIER:} |} -> parameter
+	parameter <- {| {:type: VAR_TYPE :} S <vardef_stars>? S {:name:IDENTIFIER:} |}
 	parameters <- {| parameter (S ',' S parameter)* |}
 
 	vardef_stars <- {:stars: [*]+ :}
 	vardef_name <- {:name: IDENTIFIER :}
 	vardef_bracket <- {:array_count: '[' integer ']' :}
 	vardef_initializer <- '=' S {:initializer: expression :}
-	vardef_quad <- {| <vardef_stars>? S <vardef_name> S <vardef_bracket>? S <vardef_initializer>? |} -> vardef_quad
+	vardef_quad <- {| <vardef_stars>? S <vardef_name> S <vardef_bracket>? S <vardef_initializer>? |} 
 	vardef_quads <- {| vardef_quad (S ',' S vardef_quad)* |}
 	vardef_modifier <- S {STORAGE} S
 	vardef_modifiers <- {| vardef_modifier+ |}
@@ -466,21 +454,18 @@ local grammar = re.compile([[
 						['function'] = tree,
 						arguments = postfix.arguments
 					}
-					setmetatable(tree, metatables.expression)
 				elseif type == 'dot' or type == 'arrow' or type == 'post_increment' or type == 'post_decrement' then
 					tree = {
 						type = type,
 						ref = tree,
 						member = postfix.member
 					}
-					setmetatable(tree, metatables.expression)
 				elseif type == 'subscript' then
 					tree = {
 						type = 'subscript',
 						ref = tree,
 						subscript = postfix.subscript
 					}
-					setmetatable(tree, metatables.expression)
 				end
 			end
 		end
@@ -508,15 +493,10 @@ local grammar = re.compile([[
 				type = suffix.type,
 				right = suffix.right
 			}
-			setmetatable(expression, metatables.expression)
 			left = expression
 		end
 		return expression
-	end,
-	vardef_quad = create_mt_setter('vardef_quad'),
-	parameter = create_mt_setter('parameter'),
-	statement = create_mt_setter('statement'),
-	expression = function(t) return getmetatable(t) and t or setmetatable(t, metatables.expression) end,
+	end
 })
 
 local function read_file(filename)
