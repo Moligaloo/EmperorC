@@ -524,8 +524,16 @@ function session:load_c(filename)
 	self.definitions = grammar:match(read_file(filename))
 end
 
+function session:load_ast(filename)
+	self.definitions = json.decode(read_file(filename))
+end
+
 function session:to_ast(filename)
 	write_file(filename, json.encode(self.definitions, {indent = true}))
+end
+
+function session:to_c(filename)
+	write_file(filename, fill_template("${definitions}", self, {definitions = "\n"}))
 end
 
 function session:show_definitions(format)
@@ -536,10 +544,6 @@ function session:show_definitions(format)
 		local yaml = require 'yaml'
 		print(yaml.dump(self.definitions))
 	end
-end
-
-function session:decompile()
-	return fill_template("${definitions}", self, {definitions = "\n"})
 end
 
 return {

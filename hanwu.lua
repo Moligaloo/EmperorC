@@ -70,7 +70,15 @@ local actions = {
     session:load_c(source)
     target = target or filename_with_type(source, 'ast')
     session:to_ast(target)
-  end
+  end, 
+
+  decompile = function()
+    local session = emperor.session.new()
+    expect_type(source, {'ast'})
+    session:load_ast(source)
+    target = target or filename_with_type(source, 'c')
+    session:to_c(target)
+  end,
 }
 
 local action = actions[action_name]
