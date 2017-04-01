@@ -507,12 +507,6 @@ local function read_file(filename)
 	return content
 end
 
-local function write_file(filename, content)
-	local file = io.open(filename, 'w')
-	file:write(content)
-	file:close()
-end
-
 local session = {}
 session.__index = session
 
@@ -528,12 +522,12 @@ function session:load_ast(filename)
 	self.definitions = json.decode(read_file(filename))
 end
 
-function session:to_ast(filename)
-	write_file(filename, json.encode(self.definitions, {indent = true}))
+function session:to_ast()
+	return json.encode(self.definitions, {indent = true})
 end
 
-function session:to_c(filename)
-	write_file(filename, fill_template("${definitions}", self, {definitions = "\n"}))
+function session:to_c()
+	return fill_template("${definitions}", self, {definitions = "\n"})
 end
 
 function session:show_definitions(format)
