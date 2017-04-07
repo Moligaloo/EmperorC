@@ -10,7 +10,7 @@ function io_read(filename)
 	return content
 end
 
-local filenames = {'hello', 'globals', 'while', 'expression', 'selection'}
+local filenames = {'hello', 'globals', 'while', 'expression', 'selection', 'for'}
 
 for _, file in ipairs(filenames) do
 	it("Testing file compiling " .. file, function() 

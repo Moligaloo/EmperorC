@@ -5,7 +5,6 @@
         "name": "main",
         "body": [
             {
-                "iteration": "for",
                 "next": {
                     "type": "post_increment",
                     "ref": {
@@ -38,7 +37,7 @@
                     ],
                     "statement": "compound"
                 },
-                "statement": "iteration",
+                "statement": "for",
                 "init": {
                     "statement": "vardef",
                     "quads": [
@@ -65,8 +64,7 @@
                 }
             },
             {
-                "statement": "jump",
-                "jump": "return",
+                "statement": "return",
                 "value": {
                     "value": 0,
                     "type": "integer"
