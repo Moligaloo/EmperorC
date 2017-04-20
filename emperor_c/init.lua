@@ -50,8 +50,6 @@ local function map(list, func)
 	return mapped
 end
 
-
-
 local function errorf(format, ...)
 	error(format:format(...))
 end
