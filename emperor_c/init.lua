@@ -121,7 +121,7 @@ local ast_to_string_list = {
 				end))
 			end,
 			
-			variable = function(self) return self.value end,
+			variable = '${value}',
 
 			call = template_func('${function}(${arguments})', {arguments = ', '}),
 			post_increment = '${ref}++',
